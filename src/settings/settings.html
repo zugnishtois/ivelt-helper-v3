@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="yi" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>iVelt Pro סעטינגס</title>
+  <style>
+    :root {
+      --bg-color: #0f0f1a;
+      --card-bg: #1a1a2e;
+      --card-border: rgba(92, 157, 245, 0.1);
+      --text-main: #e0e0f0;
+      --text-muted: #8888aa;
+      --primary: #5c9df5;
+      --primary-glow: rgba(92, 157, 245, 0.15);
+      --accent: #a78bfa;
+      --sidebar-bg: #12121f;
+      --sidebar-width: 230px;
+      --radius: 10px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ===== Sidebar ===== */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--sidebar-bg);
+      border-left: 1px solid rgba(255,255,255,0.05);
+      padding: 2rem 0;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .sidebar-brand {
+      padding: 0 1.5rem 1.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      margin-bottom: 0.5rem;
+    }
+
+    .sidebar-brand h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #5c9df5, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .sidebar-brand .version {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .nav-btn {
+      background: none;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      text-align: right;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: inherit;
+      width: 100%;
+    }
+
+    .nav-btn:hover {
+      background: var(--primary-glow);
+      color: var(--primary);
+    }
+
+    .nav-btn.active {
+      background: var(--primary-glow);
+      color: var(--primary);
+      font-weight: 600;
+      border-left: 3px solid var(--primary);
+      border-right: none;
+    }
+
+    .nav-icon { font-size: 15px; width: 20px; text-align: center; flex-shrink: 0; }
+
+    .sidebar-spacer { flex: 1; }
+
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0.7rem 1.5rem;
+      font-size: 0.82rem;
+      color: #6070a0;
+      text-decoration: none;
+      cursor: pointer;
+      transition: color 0.2s;
+      border: none;
+      background: none;
+      font-family: inherit;
+      width: 100%;
+      text-align: right;
+    }
+
+    .sidebar-link:hover { color: var(--primary); }
+
+    /* ===== Content ===== */
+    .content-area {
+      flex: 1;
+      padding: 2.5rem 3rem;
+      overflow-y: auto;
+    }
+
+    .content-area::-webkit-scrollbar { width: 6px; }
+    .content-area::-webkit-scrollbar-track { background: transparent; }
+    .content-area::-webkit-scrollbar-thumb { background: rgba(92,157,245,0.2); border-radius: 3px; }
+
+    .section {
+      display: none;
+      max-width: 720px;
+    }
+
+    .section.active {
+      display: block;
+      animation: fadeSlide 0.3s ease;
+    }
+
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+    }
+
+    /* ===== Cards ===== */
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--card-border);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      padding-bottom: 0.7rem;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      color: var(--primary);
+    }
+
+    /* ===== Setting Rows ===== */
+    .setting-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.9rem 0;
+    }
+    
+    .setting-row:not(:last-child) {
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .setting-info { flex: 1; padding-left: 16px; }
+
+    .setting-info h3 {
+      font-size: 0.92rem;
+      font-weight: 500;
+      margin-bottom: 3px;
+    }
+
+    .setting-info p {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* Toggle */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 46px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    .switch input { opacity: 0; width: 0; height: 0; }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background-color: #333348;
+      transition: .3s;
+      border-radius: 24px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      right: 3px;
+      bottom: 3px;
+      background-color: #666;
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: var(--primary);
+      box-shadow: 0 0 10px rgba(92,157,245,0.3);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(-22px);
+      background-color: #fff;
+    }
+
+    select {
+      padding: 7px 12px;
+      border-radius: var(--radius);
+      border: 1px solid var(--card-border);
+      background: #222238;
+      color: var(--text-main);
+      font-size: 0.88rem;
+      font-family: inherit;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    select:focus { border-color: var(--primary); }
+
+    .save-toast {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      padding: 10px 22px;
+      border-radius: var(--radius);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s ease;
+      pointer-events: none;
+      font-size: 0.88rem;
+      box-shadow: 0 6px 20px rgba(92,157,245,0.25);
+    }
+    
+    .save-toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ===== Option Groups (segmented button control) ===== */
+    .option-group {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .option-btn {
+      padding: 6px 13px;
+      border-radius: 7px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .option-btn:hover {
+      border-color: var(--primary);
+      color: var(--text-main);
+    }
+
+    .option-btn.active {
+      background: var(--primary-glow);
+      border-color: var(--primary);
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    /* ===== Color Swatches ===== */
+    .card-desc {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+
+    .swatch-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .color-swatch {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      font-family: inherit;
+    }
+
+    .swatch-inner {
+      width: 46px;
+      height: 46px;
+      border-radius: 10px;
+      border: 2px solid rgba(255,255,255,0.08);
+      display: block;
+      transition: all 0.15s;
+    }
+
+    .color-swatch:hover .swatch-inner {
+      transform: scale(1.08);
+      border-color: rgba(255,255,255,0.3);
+    }
+
+    .color-swatch.active .swatch-inner {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px var(--primary);
+    }
+
+    .swatch-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .color-swatch.active .swatch-label {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    /* ===== Disabled state for appearance sub-options ===== */
+    #appearanceOptions.disabled {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+  </style>
+  <script type="module" crossorigin src="/assets/settings.html-DQ28w9Il.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/stateManager-ZPks4XQF.js">
+</head>
+<body>
+
+  <div class="sidebar">
+    <div class="sidebar-brand">
+      <h1>iVelt Pro</h1>
+      <div class="version">v1.0.0</div>
+    </div>
+    <button class="nav-btn active" data-target="general">
+      <span class="nav-icon">⚙️</span> אלגעמיין
+    </button>
+    <button class="nav-btn" data-target="appearance">
+      <span class="nav-icon">🎨</span> אויסזען
+    </button>
+
+    <button class="nav-btn" data-target="media">
+      <span class="nav-icon">🎬</span> מידיע
+    </button>
+    <button class="nav-btn" data-target="advanced">
+      <span class="nav-icon">🔧</span> עקסטרא
+    </button>
+
+    <div class="sidebar-spacer"></div>
+
+    <button class="sidebar-link" id="openHelp">
+      <span class="nav-icon">❓</span> הילף און שארטקאטס
+    </button>
+  </div>
+
+  <div class="content-area">
+    <!-- ===== General ===== -->
+    <div id="general" class="section active">
+      <h2 class="section-title">אלגעמיינע סעטינגס</h2>
+      <div class="card">
+        <h3 class="card-title">הויפט פונקציעס</h3>
+        
+        <div class="setting-row">
+          <div class="setting-info">
+            <h3>גיי גלייך צו אומגעליינטע תגובות (Smart Pagination)</h3>
+            <p>ווען מען קליקט אויף א קעפל פון אן אשכול, וועט עס דיר טראגן גלייך צו די ערשטע אומגעליינטע תגובה (ביי אשכולות מיט מערערע בלעטער).</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="smartPagination">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <h3>פארקלענערן בילדער (Auto Resize)</h3>
+            <p>פארקלענערט אויטאמאטיש בילדער גרעסער פון 400KB ביים ארויפלאדן, אן דעם וואס מען זאל עפעס באמערקן.</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="autoResizeImages">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <h3>גוגל סוירטש (Google Search)</h3>
+            <p>לייגט צו א גוגל סוירטש קעסטל אינעם פארום, צו קענען זוכן אין אייוועלט אדער אינעם ספעציפישן אשכול.</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="googleSearch">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">פאפ-אפ קוויק לינקס</h3>
+        <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:12px;">
+          לייג צו אייגענע לינקס וואס וועלן ארויפקומען אין די פאפ-אפ. צ.ב.ש. אן אשכול וואס מען גלייכט, א סוירטש, אדער א ספעציפישע בלאט.
+        </p>
+        <div id="customLinksContainer"></div>
+        <div style="display:flex;gap:8px;margin-top:10px;">
+          <input type="text" id="newLinkName" placeholder="נאמען (צ.ב.ש. מיין אשכול)" 
+            style="flex:1;padding:7px 10px;border-radius:8px;border:1px solid var(--card-border);background:#222238;color:var(--text-main);font-size:0.82rem;font-family:inherit;outline:none;">
+          <input type="text" id="newLinkUrl" placeholder="לינק (https://...)" dir="ltr"
+            style="flex:1.5;padding:7px 10px;border-radius:8px;border:1px solid var(--card-border);background:#222238;color:var(--text-main);font-size:0.82rem;font-family:inherit;outline:none;">
+          <button id="addLinkBtn" style="padding:7px 14px;border-radius:8px;border:1px solid rgba(92,157,245,0.2);background:rgba(92,157,245,0.12);color:var(--primary);font-size:0.82rem;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all 0.2s;">
+            + לייג צו
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Appearance ===== -->
+    <div id="appearance" class="section">
+      <h2 class="section-title">אויסזען פון פארום</h2>
+
+      <!-- Master switch card -->
+      <div class="card">
+        <h3 class="card-title">דיזיין</h3>
+        <div class="setting-row">
+          <div class="setting-info">
+            <h3>צינד אן נייע דיזיין (Custom CSS)</h3>
+            <p>טוישט די גאנצע אויסזען פון פארום צו א מאדערנע, שיינע דיזיין. אלע אויסזען-אפציעס אונטן פונקציאנירן נאר ווען דאס איז אנגעצונדן.</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="enableCustomCSS">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <h3>סטיקי תגובה קנעפלעך (Sticky Buttons)</h3>
+            <p>האלט די קנעפלעך (ציטיר, דאנק, א.א.וו.) אויפן סקרין בשעת'ן סקראלן א לאנגע תגובה.</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="stickyPosts">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ===== Media ===== -->
+    <div id="media" class="section">
+      <h2 class="section-title">מידיע</h2>
+      <div class="card">
+        <h3 class="card-title">מידיע אפציעס</h3>
+        <div class="setting-row">
+          <div class="setting-info">
+            <h3>שפיל מידיע אינעווייניג (Embedded Player)</h3>
+            <p>עפנט גוגל דרייוו און דראפבאקס ווידעא/אודיאו לינקס אלס א פלעיער גלייך אויפן פארום.</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="embeddedMedia">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <h3>אידיש24 פלעיער (Yiddish24 Player)</h3>
+            <p>שפילט אידיש24 רעקארדירונגען קליין און געשמאק דירעקט אויפן פארום.</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="yiddish24Player">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Advanced ===== -->
+    <div id="advanced" class="section">
+      <h2 class="section-title">עקסטרא פונקציעס</h2>
+      <div class="card">
+        <h3 class="card-title">נאטיפיקאציעס</h3>
+        <div class="setting-row">
+          <div class="setting-info">
+            <h3>צעטייל נאטיפיקאציעס (Split Notifications)</h3>
+            <p>צעטיילט די נאטיפיקאציע טעב אין עקסטרא טעבס פאר באדאנקט, דערמאנט און ציטירט.</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="notificationSplitter">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <h3>נאטיפיקאציע פאר נייע תגובות</h3>
+            <p>דער טעב טייטל וועט בלינקן, און ס'וועט ארויפקומען א באנער, ווען איינער שרייבט א נייע תגובה בשעת מען ליינט די אשכול.</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="newResponseNotification">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <h3>פוש נאטיפיקאציעס (Desktop Alerts)</h3>
+            <p>באקום א ווינדאוס נאטיפיקאציע ווען די באקומסט נייע נאטיפיקאציעס אויפן פארום — אפילו ווען די בראוזער איז אפן און די ביסט נישט אויפן פארום טעב.</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="pushNotifications">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title">תגובה קנעפלעך</h3>
+        <div class="setting-row">
+          <div class="setting-info">
+            <h3>דערמאן א תגובה (@)</h3>
+            <p>לייגט צו א @ קנעפל גרינג צו דערמאנען א תגובה מיטן ריכטיגן BBCode.</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="mentionButton">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <h3>קאפי לינק (Copy Link)</h3>
+            <p>לייגט צו א קאפי קנעפל גרינג צו קאפירן די דירעקטע לינק צו יעדע תגובה.</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="quoteOtherTopic">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <h3>קיבארד שארטקאטס (Shortcuts)</h3>
+            <p>לאזט נוצן קיבארד שארטקאטס (עראוס, קאנטראל+ענטער, א.א.וו.).<br>זע "הילף און שארטקאטס" אין די זייט נאוויגאציע פאר פונקטליכע דעטאלן.</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="keyboardShortcuts">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="setting-row">
+          <div class="setting-info">
+            <h3>באהאלט אשכולות (Topic Hider)</h3>
+            <p>לייגט צו אן אויג קנעפל ביי יעדע אשכול — קליק דערויף צו באהאלטן אשכולות וואס די ווילסט נישט זען.</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="topicHider">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="saveToast" class="save-toast">✓ סעיווד!</div>
+
+</body>
+</html>

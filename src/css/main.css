@@ -1,0 +1,155 @@
+/* 
+  Base Styles applied when Custom CSS is enabled.
+  These clean up the old phpBB layout, removing heavy borders and adding spacing.
+*/
+
+html.ivelt-pro-custom-css body {
+  font-family: system-ui, -apple-system, sans-serif !important;
+  background-color: var(--forum-bg, #fafafa) !important;
+  color: var(--forum-text, #333) !important;
+}
+
+html.ivelt-pro-custom-css .wrap {
+  border: none !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05) !important;
+  background-color: var(--wrap-bg, #ffffff) !important;
+  padding: 20px !important;
+  margin-top: 20px !important;
+}
+
+html.ivelt-pro-custom-css .post {
+  border: 1px solid var(--post-border, #eaeaea) !important;
+  border-radius: 8px !important;
+  margin-bottom: 15px !important;
+  background-color: var(--post-bg, #ffffff) !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02) !important;
+  transition: box-shadow 0.2s !important;
+}
+
+html.ivelt-pro-custom-css .post:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;
+}
+
+html.ivelt-pro-custom-css .postprofile {
+  border-left: 1px solid var(--post-border, #eaeaea) !important;
+  background-color: var(--profile-bg, #fcfcfc) !important;
+  border-radius: 0 8px 8px 0 !important; /* RTL, profile is on the right */
+}
+
+/* Modernize Buttons */
+html.ivelt-pro-custom-css .button,
+html.ivelt-pro-custom-css .button1,
+html.ivelt-pro-custom-css .button2 {
+  border-radius: 6px !important;
+  border: 1px solid var(--btn-border, #ddd) !important;
+  background: var(--btn-bg, #f9f9f9) !important;
+  color: var(--btn-text, #333) !important;
+  transition: all 0.2s ease !important;
+}
+
+html.ivelt-pro-custom-css .button:hover,
+html.ivelt-pro-custom-css .button1:hover,
+html.ivelt-pro-custom-css .button2:hover {
+  background: var(--btn-hover-bg, #ececec) !important;
+  border-color: var(--btn-hover-border, #ccc) !important;
+}
+
+html.ivelt-pro-custom-css .headerbar {
+  border-radius: 12px !important;
+  background: var(--header-bg, #2c3e50) !important;
+  color: var(--header-text, #fff) !important;
+  border: none !important;
+}
+
+/* --- Media Player Styles --- */
+.ivelt-pro-media-root {
+  margin-top: 1.5rem;
+  padding: 0.75rem;
+  border-left: 3px solid var(--primary, #3477db);
+  background: var(--media-bg, rgba(52, 119, 219, 0.1));
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  border-radius: 0 8px 8px 0;
+}
+
+.ivelt-pro-media-root .media-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ivelt-pro-media-root .media-links {
+  display: flex;
+  gap: 1rem;
+}
+
+.ivelt-pro-media-root .media-links .button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 4px 10px;
+  font-size: 0.9em;
+  text-decoration: none;
+}
+
+.ivelt-pro-media-root .media-container {
+  display: flex;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #000;
+}
+
+.ivelt-pro-media-root .media-container iframe,
+.ivelt-pro-media-root .media-container video {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* Audio specific overrides */
+.ivelt-pro-media-root .media-container.is-audio {
+  aspect-ratio: auto;
+  height: 54px;
+  background: transparent;
+}
+
+.ivelt-pro-media-root .media-container.is-audio video {
+  position: relative;
+}
+
+/* --- Sticky Posts --- */
+.ivelt-pro-sticky {
+  position: fixed !important;
+  z-index: 1 !important;
+  top: 5px !important;
+  background-color: var(--sticky-bg, rgba(202, 220, 235, 0.45));
+  border: 1px solid var(--sticky-border, #C7C3BF);
+  padding: 4px 4px 4px 7px;
+  border-radius: 4px;
+  backdrop-filter: blur(2px);
+}
+\
+/* Fix for notification splitter dropdown positioning */
+html.ivelt-pro-custom-css .notif-bell .dropdown-extended { right: auto !important; left: 0 !important; }
+html[dir='rtl'].ivelt-pro-custom-css .notif-bell .dropdown-extended { right: 0 !important; left: auto !important; }\
+\
+/* Visual Fixes */
+html.ivelt-pro-custom-css .post { background-color: var(--wrap-bg, #ffffff) !important; border: 1px solid var(--btn-border, #ddd) !important; box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important; margin-bottom: 25px !important; }
+html.ivelt-pro-custom-css .postbody { padding-bottom: 20px !important; }
+html.ivelt-pro-custom-css .postprofile { border-left: 1px solid var(--btn-border, #ddd) !important; background-color: var(--forum-bg, #fafafa) !important; }
+html.ivelt-pro-custom-css .headerbar { background: #2c3e50 !important; color: #fff !important; }\
+\
+/* Additional visual fixes to header */
+html.ivelt-pro-custom-css .headerbar, html.ivelt-pro-custom-css .forabg .header, html.ivelt-pro-custom-css .forumbg .header { background-color: #2c3e50 !important; background-image: none !important; color: white !important; }
+html.ivelt-pro-custom-css .headerbar a, html.ivelt-pro-custom-css .forabg .header a, html.ivelt-pro-custom-css .forumbg .header a { color: white !important; }\
+\
+/* Fix for notifications dropping on right side */
+html[dir='rtl'].ivelt-pro-custom-css .dropdown-extended { right: 0 !important; left: auto !important; }\

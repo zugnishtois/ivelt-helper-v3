@@ -1,0 +1,46 @@
+/* Theme Configurations */
+
+/* Modern Light Theme */
+html.ivelt-pro-custom-css.theme-modern-light {
+  --forum-bg: #f0f2f5;
+  --wrap-bg: #ffffff;
+  --forum-text: #212529;
+  
+  --post-bg: #ffffff;
+  --post-border: #e9ecef;
+  --profile-bg: #f8f9fa;
+  
+  --btn-bg: #ffffff;
+  --btn-border: #ced4da;
+  --btn-text: #495057;
+  --btn-hover-bg: #e9ecef;
+  --btn-hover-border: #adb5bd;
+  
+  --header-bg: #ffffff;
+  --header-text: #212529;
+}
+
+/* Modern Dark Theme */
+html.ivelt-pro-custom-css.theme-modern-dark {
+  --forum-bg: #121212;
+  --wrap-bg: #1e1e1e;
+  --forum-text: #e0e0e0;
+  
+  --post-bg: #242424;
+  --post-border: #333333;
+  --profile-bg: #1e1e1e;
+  
+  --btn-bg: #2a2a2a;
+  --btn-border: #444444;
+  --btn-text: #e0e0e0;
+  --btn-hover-bg: #3a3a3a;
+  --btn-hover-border: #555555;
+  
+  --header-bg: #1e1e1e;
+  --header-text: #ffffff;
+}
+
+/* Classic theme just falls back to default phpBB styles mostly */
+html.ivelt-pro-custom-css.theme-classic {
+  /* Minimal overrides */
+}
