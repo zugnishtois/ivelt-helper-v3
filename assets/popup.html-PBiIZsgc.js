@@ -1,0 +1,1 @@
+import"./modulepreload-polyfill-B5Qt9EMX.js";document.addEventListener("DOMContentLoaded",()=>{const e=document.getElementById("openSettings");e&&e.addEventListener("click",()=>{chrome.runtime.openOptionsPage()})});

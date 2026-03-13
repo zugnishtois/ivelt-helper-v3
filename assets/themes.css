@@ -1,0 +1,185 @@
+/* Theme Configurations */
+
+/* Modern Light Theme */
+html.ivelt-pro-custom-css.theme-modern-light {
+  --forum-bg: #f0f2f5;
+  --wrap-bg: #ffffff;
+  --forum-text: #212529;
+  
+  --post-bg: #ffffff;
+  --post-border: #e9ecef;
+  --profile-bg: #f8f9fa;
+  
+  --btn-bg: #ffffff;
+  --btn-border: #ced4da;
+  --btn-text: #495057;
+  --btn-hover-bg: #e9ecef;
+  --btn-hover-border: #adb5bd;
+  
+  --header-bg: #ffffff;
+  --header-text: #212529;
+}
+
+/* Modern Dark Theme */
+html.ivelt-pro-custom-css.theme-modern-dark {
+  --forum-bg: #121212;
+  --wrap-bg: #1e1e1e;
+  --forum-text: #e0e0e0;
+  
+  --post-bg: #242424;
+  --post-border: #333333;
+  --profile-bg: #1e1e1e;
+  
+  --btn-bg: #2a2a2a;
+  --btn-border: #444444;
+  --btn-text: #e0e0e0;
+  --btn-hover-bg: #3a3a3a;
+  --btn-hover-border: #555555;
+  
+  --header-bg: #1e1e1e;
+  --header-text: #ffffff;
+}
+
+/* Classic theme just falls back to default phpBB styles mostly */
+html.ivelt-pro-custom-css.theme-classic {
+  /* Minimal overrides */
+}
+
+/* Action Bars (Top and Bottom) */
+html.ivelt-pro-custom-css .action-bar {
+  background-color: transparent !important;
+  margin-bottom: 20px !important;
+}
+
+/* Quick Reply Box */
+html.ivelt-pro-custom-css #message-box textarea {
+  border-radius: 8px !important;
+  border: 1px solid var(--border-color, #eaeaea) !important;
+  padding: 15px !important;
+  font-family: inherit !important;
+  font-size: 1.1em !important;
+  resize: vertical !important;
+}
+
+/* --- Additional overrides for Navigation and Dropdowns --- */
+
+html.ivelt-pro-custom-css .navbar .nav-main {
+  display: flex !important;
+  align-items: center !important;
+  gap: 15px !important;
+}
+
+html.ivelt-pro-custom-css .dropdown-container {
+  position: relative !important;
+}
+
+html.ivelt-pro-custom-css .dropdown-contents {
+  background-color: var(--card-bg, #ffffff) !important;
+  border: 1px solid var(--border-color, #eaeaea) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+  padding: 10px 0 !important;
+}
+
+html.ivelt-pro-custom-css .dropdown-contents li {
+  padding: 5px 15px !important;
+}
+
+html.ivelt-pro-custom-css .dropdown-contents li a {
+  color: var(--text-main, #333) !important;
+  text-decoration: none !important;
+  display: block !important;
+  padding: 5px 0 !important;
+}
+
+html.ivelt-pro-custom-css .dropdown-contents li a:hover {
+  color: var(--primary, #3477db) !important;
+}
+
+/* Make icons match text color */
+html.ivelt-pro-custom-css .icon {
+  color: inherit !important;
+}
+
+html.ivelt-pro-custom-css .icon.fa-file-o.icon-red {
+  color: #e74c3c !important;
+}
+
+html.ivelt-pro-custom-css .icon.fa-file-o.icon-blue {
+  color: #3498db !important;
+}
+
+html.ivelt-pro-custom-css .icon.fa-file-o.icon-gray {
+  color: var(--text-muted, #7f8c8d) !important;
+}
+
+/* User Avatars */
+html.ivelt-pro-custom-css .avatar {
+  border-radius: 50% !important;
+  border: 2px solid var(--border-color, #eaeaea) !important;
+  padding: 2px !important;
+  background-color: var(--card-bg, #fff) !important;
+}
+
+/* Notification Bell Dropdowns */
+html.ivelt-pro-custom-css .notif-bell {
+  position: relative !important;
+  display: inline-block !important;
+  margin: 0 5px !important;
+}
+
+html.ivelt-pro-custom-css .notif-bell a.dropdown-trigger {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+}
+
+html.ivelt-pro-custom-css .notif-bell .badge {
+  background-color: #e74c3c !important;
+  color: white !important;
+  border-radius: 12px !important;
+  padding: 2px 6px !important;
+  font-size: 0.8em !important;
+  position: absolute !important;
+  top: -5px !important;
+  right: -5px !important;
+}
+
+html.ivelt-pro-custom-css .dropdown-extended {
+  background-color: var(--card-bg, #ffffff) !important;
+  border: 1px solid var(--border-color, #eaeaea) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important;
+  min-width: 300px !important;
+}
+
+html.ivelt-pro-custom-css .dropdown-extended .header {
+  background-color: var(--card-bg-alt, #f8f9fa) !important;
+  color: var(--text-main, #333) !important;
+  border-bottom: 1px solid var(--border-color, #eaeaea) !important;
+  padding: 10px 15px !important;
+  border-radius: 8px 8px 0 0 !important;
+  text-align: center !important;
+  font-weight: bold !important;
+}
+
+html.ivelt-pro-custom-css .dropdown-extended ul {
+  max-height: 400px !important;
+  overflow-y: auto !important;
+}
+
+html.ivelt-pro-custom-css .dropdown-extended ul li.notification-block {
+  border-bottom: 1px solid var(--border-color, #eaeaea) !important;
+}
+
+html.ivelt-pro-custom-css .dropdown-extended ul li.notification-block:hover {
+  background-color: var(--row-hover, #f1f5f9) !important;
+}
+
+html.ivelt-pro-custom-css .dropdown-extended .footer {
+  background-color: var(--card-bg-alt, #f8f9fa) !important;
+  border-top: 1px solid var(--border-color, #eaeaea) !important;
+  border-radius: 0 0 8px 8px !important;
+  padding: 10px !important;
+  text-align: center !important;
+}

@@ -1,0 +1,14 @@
+import{l as _}from"./stateManager-Dedc2-BP.js";const m="ivelt-notification-check",g=2,l="ivelt_last_notification_count";chrome.runtime.onInstalled.addListener(t=>{console.log("iVelt Pro extension installed:",t.reason),chrome.alarms.create(m,{delayInMinutes:1,periodInMinutes:g})});chrome.runtime.onStartup.addListener(()=>{chrome.alarms.create(m,{delayInMinutes:.5,periodInMinutes:g})});chrome.alarms.onAlarm.addListener(async t=>{t.name!==m||!(await _()).pushNotifications||await y()});chrome.notifications.onClicked.addListener(t => {
+  if (t.startsWith("ivelt-notif")) {
+    const targetUrl = "https://www.ivelt.com/forum/ucp.php?i=ucp_notifications";
+    chrome.tabs.query({ url: "*://*.ivelt.com/*" }, tabs => {
+      if (tabs && tabs.length > 0) {
+        chrome.tabs.update(tabs[0].id, { url: targetUrl, active: true });
+        chrome.windows.update(tabs[0].windowId, { focused: true });
+      } else {
+        chrome.tabs.create({ url: targetUrl });
+      }
+    });
+    chrome.notifications.clear(t);
+  }
+});async function y(){var t,o;try{const e=await chrome.cookies.get({url:"https://www.ivelt.com",name:"phpbb3_sw7kk_u"}),i=(e==null?void 0:e.value)||"";if(!i||i==="1"||i.length<=1)return;const u=await fetch("https://www.ivelt.com/forum/index.php",{credentials:"include"});if(!u.ok)return;const c=await u.text(),a=new DOMParser().parseFromString(c,"text/html"),r=a.querySelector("#notification_list_button .badge");if(!r)return;const d=((t=r.textContent)==null?void 0:t.trim())||"0",n=parseInt(d,10);if(isNaN(n)||n===0){await chrome.storage.local.set({[l]:0});return}const f=(await chrome.storage.local.get([l]))[l]||0;if(n>f){const w=n-f;let h=`דו האסט ${n} נייע נאטיפיקאציעס`;const p=a.querySelector(".notification_list .notification-title");p&&(h=((o=p.textContent)==null?void 0:o.trim())||h),chrome.notifications.create(`ivelt-notif-${Date.now()}`,{type:"basic",iconUrl:chrome.runtime.getURL("assets/icon128.png"),title:`iVelt — ${w} נייע נאטיפיקאציע${w>1?"ס":""}`,message:h,priority:1})}await chrome.storage.local.set({[l]:n})}catch(e){console.error("iVelt Pro: Notification check failed:",e)}}chrome.runtime.onMessage.addListener((t,o,e)=>{if(t.action==="fetchYiddish24Audio"&&t.url)return x(t.url).then(i=>e(i)).catch(()=>e({audioUrl:null})),!0});async function x(t){var o;try{const e=await fetch(t,{headers:{Referer:"https://www.yiddish24.com/",Accept:"text/html"}});if(!e.ok)return{audioUrl:null,title:null};const i=await e.text(),c=new DOMParser().parseFromString(i,"text/html"),s=c.querySelector("[data-song-url]"),a=(s==null?void 0:s.getAttribute("data-song-url"))||null,r=c.querySelector(".bulletin-news-des-title, h1, .article-title"),d=((o=r==null?void 0:r.textContent)==null?void 0:o.trim())||null;return{audioUrl:a,title:d}}catch(e){return console.error("iVelt Pro: Failed to fetch Yiddish24 audio:",e),{audioUrl:null,title:null}}}
