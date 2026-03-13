@@ -1,0 +1,88 @@
+{
+  "manifest_version": 3,
+  "name": "iVelt Pro",
+  "version": "1.0.0",
+  "description": "The ultimate, unified extension for iVelt.com.",
+  "icons": {
+    "48": "assets/icon48.png",
+    "128": "assets/icon128.png"
+  },
+  "action": {
+    "default_popup": "src/popup/popup.html"
+  },
+  "options_ui": {
+    "page": "src/settings/settings.html",
+    "open_in_tab": true
+  },
+  "content_scripts": [
+    {
+      "js": [
+        "assets/contentMain.ts-loader-A9NjK-qz.js"
+      ],
+      "matches": [
+        "*://*.ivelt.com/*",
+        "*://*.yiddishworld.com/*",
+        "*://*.198.153.76.147/*"
+      ],
+      "css": [
+        "assets/main.css",
+        "assets/themes.css"
+      ],
+      "run_at": "document_end"
+    }
+  ],
+  "background": {
+    "service_worker": "service-worker-loader.js",
+    "type": "module"
+  },
+  "permissions": [
+    "storage",
+    "tabs",
+    "cookies",
+    "notifications",
+    "alarms",
+    "declarativeNetRequest",
+    "declarativeNetRequestWithHostAccess",
+    "offscreen"
+  ],
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "ruleset_1",
+        "enabled": true,
+        "path": "rules.json"
+      }
+    ]
+  },
+  "web_accessible_resources": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "resources": [
+        "src/help/help.html"
+      ],
+      "use_dynamic_url": false
+    },
+    {
+      "matches": [
+        "*://*.198.153.76.147/*",
+        "*://*.ivelt.com/*",
+        "*://*.yiddishworld.com/*"
+      ],
+      "resources": [
+        "assets/stateManager-ZPks4XQF.js",
+        "assets/contentMain.ts-C_zKjhdx.js"
+      ],
+      "use_dynamic_url": false
+    }
+  ],
+  "host_permissions": [
+    "*://*.ivelt.com/*",
+    "*://*.yiddishworld.com/*",
+    "*://*.yiddish24.com/*",
+    "*://*.y24.app/*",
+    "*://cloudfront.yiddish24.com/*",
+    "*://videos.yiddish24.com/*"
+  ]
+}

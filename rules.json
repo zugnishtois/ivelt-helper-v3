@@ -1,0 +1,28 @@
+[
+  {
+    "id": 1,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "Referer",
+          "operation": "set",
+          "value": "https://www.yiddish24.com/"
+        },
+        {
+          "header": "Origin",
+          "operation": "set",
+          "value": "https://www.yiddish24.com"
+        }
+      ]
+    },
+    "condition": {
+      "requestDomains": [
+        "music.y24.app",
+        "cloudfront.yiddish24.com",
+        "videos.yiddish24.com"
+      ]
+    }
+  }
+]
