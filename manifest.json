@@ -22,7 +22,7 @@
         "*://*.198.153.76.147/*"
       ],
       "css": [
-        "src/css/main.css"
+        "assets/main.css"
       ],
       "js": [
         "src/js/contentMain.ts"
