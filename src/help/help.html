@@ -7,243 +7,236 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
-      background: #0f0f1a;
-      color: #e0e0f0;
+      font-family: Verdana, Arial, Helvetica, sans-serif;
+      background: #ECF1F2;
+      color: #333;
       min-height: 100vh;
-      padding: 3rem 2rem;
+      padding: 24px 20px;
       display: flex;
       justify-content: center;
+      font-size: 13px;
     }
 
     .container {
-      max-width: 700px;
+      max-width: 760px;
       width: 100%;
+      background: #fff;
+      border: 1px solid #B9C2C9;
     }
 
-    header {
+    .topheader {
+      padding: 14px 22px;
+      background: linear-gradient(180deg, #12A3EB 0%, #1675B9 100%);
+      color: #fff;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.4) inset;
       text-align: center;
-      margin-bottom: 2.5rem;
-      padding-bottom: 1.5rem;
-      border-bottom: 1px solid rgba(92,157,245,0.1);
+    }
+    .topheader h1 {
+      font-size: 18px;
+      font-weight: bold;
+      text-shadow: 0 1px 1px rgba(0,0,0,0.25);
+    }
+    .topheader p {
+      font-size: 11px;
+      opacity: 0.9;
+      margin-top: 2px;
     }
 
-    header h1 {
-      font-size: 1.8rem;
-      font-weight: 700;
-      background: linear-gradient(135deg, #5c9df5, #a78bfa);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 6px;
-    }
+    .body { padding: 18px 22px 24px; }
 
-    header p {
-      color: #8888aa;
-      font-size: 0.9rem;
-    }
-
-    .section {
-      background: #1a1a2e;
-      border: 1px solid rgba(92,157,245,0.1);
-      border-radius: 12px;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-    }
-
+    .section { margin-bottom: 16px; border: 1px solid #B9C2C9; }
     .section h2 {
-      font-size: 1.1rem;
-      color: #5c9df5;
-      margin-bottom: 1.2rem;
-      padding-bottom: 0.6rem;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
+      font-size: 13px;
+      font-weight: bold;
+      padding: 7px 12px;
+      background: linear-gradient(180deg, #DCE8F0 0%, #B9CFDC 100%);
+      color: #105289;
+      border-bottom: 1px solid #B9C2C9;
     }
+    .section .inner { padding: 12px 14px; }
 
     .shortcut-row {
       display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 10px 0;
-    }
-
-    .shortcut-row:not(:last-child) {
-      border-bottom: 1px solid rgba(255,255,255,0.04);
-    }
-
-    .keys {
-      display: flex;
-      gap: 4px;
-      flex-shrink: 0;
-      min-width: 110px;
-      justify-content: flex-start;
-    }
-
-    kbd {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 30px;
-      height: 28px;
-      padding: 0 10px;
-      background: linear-gradient(180deg, #2a2a44 0%, #1e1e36 100%);
-      border: 1px solid rgba(92,157,245,0.2);
-      border-radius: 6px;
-      font-size: 0.8rem;
-      font-family: system-ui, sans-serif;
-      color: #5c9df5;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05);
-      white-space: nowrap;
-    }
-
-    .shortcut-desc {
-      color: #a0a8c8;
-      font-size: 0.88rem;
-      line-height: 1.5;
-    }
-
-    .feature-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+      align-items: flex-start;
       gap: 12px;
+      padding: 8px 0;
+    }
+    .shortcut-row:not(:last-child) { border-bottom: 1px dashed #DDE3E8; }
+
+    .keys { display: flex; gap: 4px; flex-shrink: 0; min-width: 110px; }
+    .key {
+      display: inline-block;
+      padding: 2px 7px;
+      background: linear-gradient(180deg, #ffffff 0%, #e5eef4 100%);
+      border: 1px solid #B9C2C9;
+      border-radius: 3px;
+      font-family: Consolas, monospace;
+      font-size: 11px;
+      color: #105289;
+      box-shadow: 0 1px 0 #fff inset;
+    }
+    .desc { font-size: 12.5px; line-height: 1.55; color: #333; flex: 1; }
+    .desc .icon-inline {
+      display: inline-block;
+      padding: 1px 6px;
+      background: #f0f4f8;
+      border: 1px solid #B9C2C9;
+      border-radius: 3px;
+      font-family: Consolas, monospace;
+      font-size: 11px;
     }
 
-    .feature-item {
-      background: rgba(255,255,255,0.03);
-      border-radius: 8px;
-      padding: 14px;
-      border: 1px solid rgba(255,255,255,0.04);
+    .feature {
+      padding: 8px 0;
     }
-
-    .feature-item h3 {
-      font-size: 0.9rem;
-      color: #d0d8f0;
-      margin-bottom: 6px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .feature-item p {
-      color: #8088a8;
-      font-size: 0.78rem;
-      line-height: 1.5;
-    }
-
-    .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 1.5rem;
-      padding: 8px 16px;
-      background: rgba(92,157,245,0.1);
-      border: 1px solid rgba(92,157,245,0.15);
-      border-radius: 8px;
-      color: #8898c0;
-      text-decoration: none;
-      font-size: 0.82rem;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .back-link:hover {
-      background: rgba(92,157,245,0.18);
-      color: #b0c0e0;
-    }
+    .feature:not(:last-child) { border-bottom: 1px dashed #DDE3E8; }
+    .feature h3 { font-size: 13px; font-weight: bold; color: #105289; margin-bottom: 4px; }
+    .feature p { font-size: 12.5px; line-height: 1.55; color: #444; }
+    .feature p + p { margin-top: 5px; }
+    .feature small { color: #777; font-size: 11px; }
   </style>
 </head>
 <body>
   <div class="container">
-    <header>
+    <div class="topheader">
       <h1>iVelt Pro — הילף</h1>
-      <p>שארטקאטס, פיטשערס און אלגעמיינע אינפארמאציע</p>
-    </header>
-
-    <!-- Keyboard Shortcuts -->
-    <div class="section">
-      <h2>⌨️ קיבאורד שארטקאטס</h2>
-
-      <div class="shortcut-row">
-        <span class="keys"><kbd>→</kbd> <kbd>←</kbd></span>
-        <span class="shortcut-desc">גיין צום פריערדיגן/קומענדיגן בלאט אינעם אשכול</span>
-      </div>
-      <div class="shortcut-row">
-        <span class="keys"><kbd>↑</kbd> <kbd>↓</kbd></span>
-        <span class="shortcut-desc">שפרינגען גאנץ ארויף אדער אראפ</span>
-      </div>
-      <div class="shortcut-row">
-        <span class="keys"><kbd>Ctrl</kbd> + <kbd>Enter</kbd></span>
-        <span class="shortcut-desc">שיקן די תגובה</span>
-      </div>
-      <div class="shortcut-row">
-        <span class="keys"><kbd>Alt</kbd> + <kbd>V</kbd></span>
-        <span class="shortcut-desc">פריוויו פון די תגובה</span>
-      </div>
-      <div class="shortcut-row">
-        <span class="keys"><kbd>Alt</kbd> + <kbd>A</kbd></span>
-        <span class="shortcut-desc">גיין צו אקטיווע אשכולות</span>
-      </div>
-      <div class="shortcut-row">
-        <span class="keys"><kbd>Alt</kbd> + <kbd>N</kbd></span>
-        <span class="shortcut-desc">עפענען נאטיפיקאציעס</span>
-      </div>
+      <p>קיבארד שארטקאטס און הסברים פאר אלע פיטשערס</p>
     </div>
 
-    <!-- Features Overview -->
-    <div class="section">
-      <h2>✨ פיטשערס</h2>
-      <div class="feature-grid">
-        <div class="feature-item">
-          <h3>📋 סמארט פעידזשינג</h3>
-          <p>קליק אויפן אשכול צו גיין גלייך צו די אומגעליינטע תגובות</p>
-        </div>
-        <div class="feature-item">
-          <h3>🖼️ בילדער קאמפרעסער</h3>
-          <p>פארקלענערט בילדער גרעסער פון 400KB ביים ארויפלאדן</p>
-        </div>
-        <div class="feature-item">
-          <h3>🎬 מידיע פלעיער</h3>
-          <p>עפנט גוגל דרייוו און דראפבאקס לינקס גלייך אויפן פארום</p>
-        </div>
-        <div class="feature-item">
-          <h3>🎵 יידיש24 פלעיער</h3>
-          <p>שפילט אידיש24 רעקארדירונגען דירעקט און געשמאק אויפן פארום נעבן די לינק</p>
-        </div>
-        <div class="feature-item">
-          <h3>🔔 נאטיפיקאציע ספליטער</h3>
-          <p>צעטיילט באדאנקט, דערמאנט און ציטירט אין עקסטרא בעלס</p>
-        </div>
-        <div class="feature-item">
-          <h3>@ דערמאן תגובה</h3>
-          <p>דערמאנט א ניק מיטן ריכטיגן BBCode ציטאט</p>
-        </div>
-        <div class="feature-item">
-          <h3>🔍 גוגל זוכן</h3>
-          <p>זוכט דורך גוגל אין אייוועלט אדער אינעם אשכול</p>
-        </div>
-        <div class="feature-item">
-          <h3>📌 סטיקי קנעפלעך</h3>
-          <p>האלט די תגובה קנעפלעך אויפן סקרין בשעת'ן סקראלן</p>
-        </div>
-        <div class="feature-item">
-          <h3>💬 נייע תגובות</h3>
-          <p>דער טעב בלינקט ווען עס קומט צו א נייע תגובה</p>
+    <div class="body">
+
+      <!-- ===== Keyboard Shortcuts ===== -->
+      <div class="section">
+        <h2>קיבארד שארטקאטס</h2>
+        <div class="inner">
+
+          <div class="shortcut-row">
+            <div class="keys"><span class="key">→</span> <span class="key">←</span></div>
+            <div class="desc">דרוקט די רעכטע/לינקע ערראוס אויפן קיבארד צו גיין צום פריערדיגן/קומענדיגן בלאט אינעם אשכול.</div>
+          </div>
+
+          <div class="shortcut-row">
+            <div class="keys"><span class="key">↑</span> <span class="key">↓</span></div>
+            <div class="desc">דרוקט די ארויף/אראפ ערראוס אויפן קיבארד צו גיין צום ארויף/אראפ אינעם אשכול.</div>
+          </div>
+
+          <div class="shortcut-row">
+            <div class="keys"><span class="key">Ctrl</span> <span class="key">Enter</span></div>
+            <div class="desc">צו שיקן א געשריבענעם תגובה.</div>
+          </div>
+
+          <div class="shortcut-row">
+            <div class="keys"><span class="key">Alt</span> <span class="key">v</span></div>
+            <div class="desc">פריוויו פונעם געשריבענעם תגובה.</div>
+          </div>
+
+          <div class="shortcut-row">
+            <div class="keys"><span class="key">Alt</span> <span class="key">a</span></div>
+            <div class="desc">גיי צו אקטיווע אשכולות.</div>
+          </div>
+
+          <div class="shortcut-row">
+            <div class="keys"><span class="key">Alt</span> <span class="key">n</span></div>
+            <div class="desc">עפן/פארמאך די נאטיפיקאציעס דראפדאון.</div>
+          </div>
+
+          <div class="shortcut-row">
+            <div class="keys"><span class="key">Alt</span> <span class="key">m</span></div>
+            <div class="desc">עפן די נעקסטע אומגעליינטע נאטיפיקאציע. אונטערשטיצט אויך נייע אשכול נאטיפיקאציעס דורך <code>data-real-url</code>.</div>
+          </div>
+
+          <div class="shortcut-row">
+            <div class="keys"><span class="key">_</span></div>
+            <div class="desc">קליקט אויפן קנעפל אין א תגובה צו ציטירן בלויז דעם לעצטן פון דעם פריערדיגן ציטאט.</div>
+          </div>
+
+          <div class="shortcut-row">
+            <div class="keys"><span class="key">@</span></div>
+            <div class="desc">קליקט אויפן <span class="icon-inline">@</span> קנעפל אין א תגובה צו דערמאנען דעם תגובה.</div>
+          </div>
+
+          <div class="shortcut-row">
+            <div class="keys"><span class="key">📋</span></div>
+            <div class="desc">קליקט אויפן <span class="icon-inline">copy</span> קנעפל אין א תגובה צו ציטירן דעם תגובה אין אן אנדערע אשכול (גאנצע BBCode + מקור-לינק).</div>
+          </div>
+
+          <div class="shortcut-row">
+            <div class="keys"><span class="key">💬</span></div>
+            <div class="desc">קליקט אויפן <span class="icon-inline">comment</span> קנעפל אין א תגובה צו ציטירן דעם תגובה אין דעם קאמענטארן אשכול.</div>
+          </div>
+
         </div>
       </div>
-    </div>
 
-    <!-- Credits -->
-    <div class="section">
-      <h2>🙏 קרעדיט</h2>
-      <p style="color:#8088a8; font-size:0.85rem; line-height:1.8;">
-        באזירט אויף די ארגינעלע iVelt Helper, iVelt Media, און iVelt Image Resizer עקסטענשענס.<br>
-        א דאנק פאר אלע וואס האבן ארויסגעהאלפן פון די אייוועלט קהילה.
-      </p>
-    </div>
+      <!-- ===== Quote-selection popup ===== -->
+      <div class="section">
+        <h2>"ציטיר" פאפ-אפ ביים סעלעקטן טעקסט</h2>
+        <div class="inner">
+          <div class="feature">
+            <p>סעלעקטירט וועלכע ווערטער איר ווילט אין א תגובה — א "ציטיר" קנעפל וועט ארויפקומען איבער די סעלעקציע.</p>
+            <p>א קליק אויף "ציטיר" וועט אריינלייגן בלויז די סעלעקטירטע ווערטער (מיט די ריכטיגע <code>[quote=…]</code> טעגס) אינעם תגובה-קעסטל.</p>
+            <p><small>צו אויפהויבן/אראפנעמען: סעטינגס → עקסטרא → "ציטיר" פאפ-אפ ביים סעלעקטן טעקסט.</small></p>
+          </div>
+        </div>
+      </div>
 
-    <a class="back-link" id="openSettings">⚙️ עפן סעטינגס</a>
+      <!-- ===== Movable buttons bar ===== -->
+      <div class="section">
+        <h2>באוועגליכע קנעפלעך באר</h2>
+        <div class="inner">
+          <div class="feature">
+            <p>איר קענט פריי ציען די תגובה-קנעפלעך באר צו וואו אימער אינעם תגובה. די פלאץ בלייבט אינעווייניג די זעלבע תגובה.</p>
+            <p>נאך וואס איר ענדיגט די ציען, וועט די פלאץ זיין געזעצט פאר <strong>אלע</strong> תגובות אויפן פארום.</p>
+            <p>צו רעסעטן: סעטינגס → עקסטרא → ריסעט די באוועגליכע קנעפלעך באר.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Image compressor ===== -->
+      <div class="section">
+        <h2>אויטאמאטישע בילד פארקלענערן</h2>
+        <div class="inner">
+          <div class="feature">
+            <p>בילדער גרעסער פון 400KB ווערן אויטאמאטיש פארקלענערט ביים ארויפלאדן — דורכן פייל-פיקער, דרעג-און-דראפ, אדער פעיסט.</p>
+            <p>גיפס (.gif) בלייבן ווי זיי זענען — צו האלטן די אנימאציעס.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Media player ===== -->
+      <div class="section">
+        <h2>אינעווייניגסטער מידיע פלעיער</h2>
+        <div class="inner">
+          <div class="feature">
+            <h3>גוגל דרייוו און דראפבאקס פלעיער</h3>
+            <p>גוגל דרייוו און דראפבאקס לינקס ווערן אוטאמאטיש געטוישט אין א פלעיער גלייך אויפן פארום.</p>
+            <p><strong>קליין דיפאלט, גרויס ביים שפילן:</strong> דער פלעיער הויבט זיך אן קליין (320×180). ביים ערשטן פליי-קליק (אדער ביים ⤢ קנעפל פאר גוגל דרייוו) ווערט ער דאפלט גרעסער (640×360).</p>
+            <p>פאר MP3 (אודיאו), בלייבט די פלעיער קליין — נאר די אודיאו קאנטראלן.</p>
+          </div>
+          <div class="feature">
+            <h3>אידיש24 פלעיער</h3>
+            <p>אידיש24 רעקארדירונגען שפילן זיך אינעווייניג די פאפ-אפ — אן עפענען א נייעם טעב.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Notifications ===== -->
+      <div class="section">
+        <h2>נאטיפיקאציעס</h2>
+        <div class="inner">
+          <div class="feature">
+            <h3>פרישע תגובה ווארענונג</h3>
+            <p>ווען נייע תגובות זענען צוגעקומען בשעת איר ליינט, וועט איין בלינקעדער טעב-טייטל און א באנער אונטן ווייזן.</p>
+            <p>אזוי באלד ווי איר ליינט די אשכול אין אן אנדערן טעב, וועט די באנער און די בלינקעדע טעב-טייטל אויטאמאטיש אויפהערן — אן רילאוד.</p>
+          </div>
+          <div class="feature">
+            <h3>צעטיילטע נאטיפיקאציעס</h3>
+            <p>די נאטיפיקאציע גלאק ווערט צעטיילט אין באזונדערע גלעקלעך פאר באדאנקט, דערמאנט, און ציטירט.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
   </div>
-
-  <script type="module" src="./help.ts"></script>
 </body>
 </html>

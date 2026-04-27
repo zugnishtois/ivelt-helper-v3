@@ -23,14 +23,14 @@ async function init() {
   if (settings.embeddedMedia) setupMediaPlayer();
   if (settings.yiddish24Player) setupYiddish24Player();
 
-  if (settings.mentionButton !== false || settings.quoteOtherTopic !== false) {
-    setupExtraButtons(
-      settings.mentionButton !== false,
-      settings.quoteOtherTopic !== false,
-      settings.movableButtonsBar !== false,
-      settings.buttonsBarPosition,
-    );
-  }
+  setupExtraButtons({
+    enableMention:        settings.mentionButton !== false,
+    enableCopyLink:       settings.quoteOtherTopic !== false,
+    enableCiteOtherTopic: settings.citeInOtherTopic !== false,
+    enableCiteLast:       settings.citeLastQuote !== false,
+    movableBar:           settings.movableButtonsBar !== false,
+    savedPosition:        settings.buttonsBarPosition,
+  });
 
   if (settings.googleSearch) setupGoogleSearch();
   if (settings.keyboardShortcuts) setupKeyboardShortcuts();

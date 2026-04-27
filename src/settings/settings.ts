@@ -65,6 +65,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   bindCheckbox('movableButtonsBar');
   bindCheckbox('warnOnLosingPost');
   bindCheckbox('alwaysCopyTopic');
+  bindCheckbox('citeInOtherTopic');
+  bindCheckbox('citeLastQuote');
+  bindCheckbox('copyAttachments');
   bindCheckbox('debugMode');
 
   bindNumberSelect('backgroundSyncPosts');

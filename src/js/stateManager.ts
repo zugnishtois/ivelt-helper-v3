@@ -21,6 +21,8 @@ export interface ExtensionSettings {
   mentionButton: boolean;
   quoteOtherTopic: boolean;
   keyboardShortcuts: boolean;
+  citeInOtherTopic: boolean;     // ציטיר אין אנדערע אשכול (full BBCode quote + url)
+  citeLastQuote: boolean;        // ציטיר לעצטע (strip nested quotes)
   newResponseNotification: boolean;
   notificationSplitter: boolean;
   googleSearch: boolean;
@@ -50,7 +52,9 @@ export const defaultSettings: ExtensionSettings = {
   yiddish24Player: true,
   mentionButton: true,
   quoteOtherTopic: true,
-  keyboardShortcuts: false,
+  keyboardShortcuts: true,
+  citeInOtherTopic: true,
+  citeLastQuote: true,
   newResponseNotification: true,
   notificationSplitter: true,
   googleSearch: true,

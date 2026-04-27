@@ -217,4 +217,68 @@
   font-family: system-ui, sans-serif;
 }
 
+/* -- Embedded Media Player -- */
+.ivelt-pro-media-root {
+  margin: 8px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ivelt-pro-media-root .media-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ivelt-pro-media-root .media-links {
+  font-size: 0.8rem;
+}
+.ivelt-pro-media-root .media-container {
+  position: relative;
+  width: 320px;
+  max-width: 100%;
+  background: #000;
+  border-radius: 6px;
+  overflow: hidden;
+  transition: width 0.25s ease, height 0.25s ease;
+}
+.ivelt-pro-media-root .media-container iframe,
+.ivelt-pro-media-root .media-container video {
+  width: 100%;
+  height: 180px;
+  display: block;
+  border: 0;
+  background: #000;
+}
+.ivelt-pro-media-root .media-container.is-audio,
+.ivelt-pro-media-root .media-container.is-audio iframe,
+.ivelt-pro-media-root .media-container.is-audio video {
+  height: 60px !important;
+  background: transparent;
+}
+.ivelt-pro-media-root .media-container.is-expanded {
+  width: 640px;
+}
+.ivelt-pro-media-root .media-container.is-expanded iframe,
+.ivelt-pro-media-root .media-container.is-expanded video {
+  height: 360px;
+}
+.ivelt-pro-media-root .ivelt-media-expand {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 26px;
+  height: 26px;
+  border: 1px solid rgba(255,255,255,0.4);
+  background: rgba(0,0,0,0.55);
+  color: #fff;
+  font-size: 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  z-index: 2;
+  line-height: 1;
+}
+.ivelt-pro-media-root .ivelt-media-expand:hover {
+  background: rgba(0,0,0,0.8);
+}
+
 /* -- New-Response banner / notification splitter etc. inherit site styles -- */

@@ -33,6 +33,20 @@ export function setupKeyboardShortcuts() {
     }
   }
 
+  // Alt+M: open the next unread notification.
+  // Uses data-real-url first (which fixes redirect for נייע אשכול notifications)
+  // then falls back to href.
+  function nextNotification() {
+    const nodes = document.querySelectorAll<HTMLAnchorElement>("li.bg2 .notification-block");
+    for (const node of nodes) {
+      const url = node.dataset.realUrl || node.href;
+      if (url) {
+        window.location.href = url;
+        break;
+      }
+    }
+  }
+
   document.addEventListener('keydown', (e) => {
     const postBtn = (document.getElementsByName("post")[0] || document.getElementsByName("submit")[0]) as HTMLElement;
     const isAltKey = e.altKey || e.getModifierState('AltGraph');
@@ -51,6 +65,10 @@ export function setupKeyboardShortcuts() {
 
     if (e.code === "KeyN" && isAltKey) {
       toggleNotification();
+    }
+
+    if (e.code === "KeyM" && isAltKey) {
+      nextNotification();
     }
 
     // Ignore arrow keys if typing in an input
