@@ -1,0 +1,95 @@
+export function setupMediaPlayer() {
+  console.log('iVelt Pro: Embedded Media Player Enabled');
+
+  // Find all post contents and preview content
+  const postContents = document.querySelectorAll(".postprofile + .postbody .content, #preview .postbody .content");
+
+  for (const contentDiv of postContents) {
+    // Select specific Google Drive and Dropbox links, avoiding those inside blockquotes
+    const mediaLinks = contentDiv.querySelectorAll(`
+      .content > a[href^="https://drive.google.com/file/d/"],
+      .content > :not(blockquote) a[href^="https://drive.google.com/file/d/"],
+      .content > a[href^="https://www.dropbox.com/scl/fi/"][href$="&dl=0"]:is([href*=".mp3"], [href*=".mp4"], [href*=".mov"], [href*=".m4a"], [href*=".m4v"], [href*="webm"]), 
+      .content > :not(blockquote) a[href^="https://www.dropbox.com"][href$="&dl=0"]:is([href*=".mp3"], [href*=".mp4"], [href*=".mov"], [href*=".m4a"], [href*=".m4v"], [href*="webm"])
+    `);
+
+    if (!mediaLinks.length) continue;
+
+    const mediaItems = Array.from(mediaLinks).map(link => {
+      const href = link.getAttribute("href");
+      if (!href) return null;
+
+      let id, type, filename;
+
+      if (href.startsWith("https://drive.google.com")) {
+        const match = /^https:\/\/drive.google.com\/file\/d\/([^/]+)/.exec(href);
+        if (match) {
+          id = match[1];
+          type = "google-drive";
+        }
+      } else if (href.startsWith("https://www.dropbox.com")) {
+        const match = /^https:\/\/www.dropbox.com\/scl\/fi\/([^/]+)\/(.+?)\?(.+)\&dl=0/.exec(href);
+        if (match) {
+          id = `${match[1]}/${match[2]}?${match[3]}`;
+          filename = match[2];
+          type = "dropbox";
+        }
+      }
+
+      if (!type) return null;
+
+      return {
+        title: link.textContent || href,
+        href,
+        id,
+        filename,
+        type
+      };
+    }).filter(Boolean); // Remove nulls
+
+    if (mediaItems.length === 0) continue;
+
+    // Build the embedded players HTML
+    const embedHTML = `
+      <div class="ivelt-pro-media-root">
+        ${mediaItems.map(item => {
+          if (!item) return '';
+          
+          const downloadHref = item.type === "google-drive" 
+            ? `https://drive.google.com/uc?export=download&id=${item.id}` 
+            : `https://www.dropbox.com/scl/fi/${item.id}&dl=1`;
+
+          const playerHtml = item.type === "google-drive"
+            ? `<iframe 
+                 src="https://drive.google.com/file/d/${item.id}/preview" 
+                 frameborder="0" 
+                 loading="lazy"
+                 scrolling="no"
+                 allowfullscreen>
+                 Your browser does not support this content
+               </iframe>`
+            : `<video controls preload="metadata" data-filename="${item.filename}">
+                 <source src="https://www.dropbox.com/scl/fi/${item.id}&dl=1"/>
+                 Your browser does not support this content
+               </video>`;
+
+          return `
+            <div class="media-item">
+              <div class="media-links">
+                <a class="button" href="${downloadHref}" target="_blank" rel="noopener noreferrer">
+                  <i class="icon fa-download"></i> דאונלאוד (Download)
+                </a>
+              </div>
+              <div class="media-container ${item.filename && item.filename.endsWith('.mp3') ? 'is-audio' : ''}">
+                ${playerHtml}
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+
+    // Insert the players right after the content div
+    contentDiv.insertAdjacentHTML("afterend", embedHTML);
+  }
+}

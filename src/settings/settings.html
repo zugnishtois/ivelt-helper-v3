@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="yi" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>iVelt Pro סעטינגס</title>
+  <style>
+    :root {
+      --page-bg: #ECF1F2;
+      --content-bg: #FFFFFF;
+      --header-bg: linear-gradient(180deg, #12A3EB 0%, #1675B9 100%);
+      --header-text: #FFFFFF;
+      --section-header-bg: linear-gradient(180deg, #DCE8F0 0%, #B9CFDC 100%);
+      --section-header-text: #105289;
+      --border-color: #B9C2C9;
+      --text-main: #333;
+      --text-muted: #666;
+      --link: #105289;
+      --link-hover: #1675B9;
+      --row-alt: #F4F7F9;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: Verdana, Arial, Helvetica, sans-serif;
+      background: var(--page-bg);
+      color: var(--text-main);
+      font-size: 13px;
+      direction: rtl;
+      min-height: 100vh;
+    }
+
+    .wrap {
+      max-width: 920px;
+      margin: 18px auto;
+      background: var(--content-bg);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .topheader {
+      padding: 14px 22px;
+      background: var(--header-bg);
+      color: var(--header-text);
+      box-shadow: 0 1px 0 rgba(255,255,255,0.4) inset;
+    }
+    .topheader h1 {
+      font-size: 18px;
+      font-weight: bold;
+      text-shadow: 0 1px 1px rgba(0,0,0,0.25);
+    }
+    .topheader .version { font-size: 11px; opacity: 0.85; margin-top: 2px; }
+
+    /* Tabs (phpBB-style) */
+    .tabs {
+      display: flex;
+      gap: 0;
+      background: #DCE8F0;
+      border-bottom: 1px solid var(--border-color);
+      padding: 0 12px;
+    }
+    .nav-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      border-bottom: none;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 12px;
+      color: var(--link);
+      transition: background 0.12s;
+      margin-top: 4px;
+      border-radius: 4px 4px 0 0;
+    }
+    .nav-btn:hover {
+      background: #ECF4F9;
+      border-color: var(--border-color);
+      border-bottom-color: transparent;
+    }
+    .nav-btn.active {
+      background: var(--content-bg);
+      border-color: var(--border-color);
+      border-bottom: 1px solid var(--content-bg);
+      margin-bottom: -1px;
+      color: #000;
+      font-weight: bold;
+    }
+
+    .content-area { padding: 18px 22px 28px; }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    .section-title {
+      font-size: 15px;
+      font-weight: bold;
+      color: var(--link);
+      margin-bottom: 12px;
+      padding-bottom: 5px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    /* Card = phpBB forabg/forumbg block */
+    .card {
+      border: 1px solid var(--border-color);
+      margin-bottom: 14px;
+      background: var(--content-bg);
+    }
+    .card-title {
+      font-size: 13px;
+      font-weight: bold;
+      padding: 7px 12px;
+      background: var(--section-header-bg);
+      color: var(--section-header-text);
+      border-bottom: 1px solid var(--border-color);
+    }
+    .card-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      padding: 8px 12px 0;
+      line-height: 1.45;
+    }
+
+    .setting-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      border-bottom: 1px solid #E0E5E8;
+    }
+    .setting-row:last-child { border-bottom: none; }
+    .setting-row:nth-child(even) { background: var(--row-alt); }
+
+    .setting-info { flex: 1; padding-left: 14px; }
+    .setting-info h3 {
+      font-size: 12px;
+      font-weight: bold;
+      margin-bottom: 3px;
+      color: var(--text-main);
+    }
+    .setting-info p { font-size: 11px; color: var(--text-muted); line-height: 1.45; }
+
+    /* Toggle (kept compact, matches forum aesthetic) */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 40px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background-color: #C5C5C5;
+      transition: .25s;
+      border-radius: 20px;
+      border: 1px solid #999;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 14px;
+      width: 14px;
+      right: 2px;
+      bottom: 2px;
+      background-color: #fff;
+      transition: .25s;
+      border-radius: 50%;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+    input:checked + .slider {
+      background-color: #12A3EB;
+      border-color: #1675B9;
+    }
+    input:checked + .slider:before { transform: translateX(-20px); }
+
+    select, input[type="text"], input[type="number"] {
+      padding: 4px 8px;
+      border: 1px solid var(--border-color);
+      background: #fff;
+      color: var(--text-main);
+      font-size: 12px;
+      font-family: inherit;
+      border-radius: 3px;
+      outline: none;
+    }
+    select:focus, input[type="text"]:focus, input[type="number"]:focus {
+      border-color: var(--link);
+      box-shadow: 0 0 3px rgba(18,163,235,0.35);
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 5px 12px;
+      background: linear-gradient(180deg, #FFFFFF 0%, #E5EEF4 100%);
+      border: 1px solid var(--border-color);
+      border-radius: 3px;
+      color: var(--link);
+      font-size: 12px;
+      font-family: inherit;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .btn:hover {
+      background: linear-gradient(180deg, #FFFFFF 0%, #D0DEE9 100%);
+      border-color: var(--link);
+    }
+    .btn-danger { color: #b22222; }
+    .btn-danger:hover { border-color: #b22222; }
+
+    .save-toast {
+      position: fixed;
+      bottom: 22px;
+      left: 22px;
+      background: linear-gradient(180deg, #12A3EB 0%, #1675B9 100%);
+      color: #fff;
+      padding: 8px 18px;
+      border-radius: 4px;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.25s ease;
+      pointer-events: none;
+      font-size: 12px;
+      font-weight: bold;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+    }
+    .save-toast.show { opacity: 1; transform: translateY(0); }
+
+    .links-list { padding: 8px 12px; }
+    .links-list .link-row {
+      display: flex; gap: 6px; align-items: center;
+      padding: 5px 0;
+    }
+    .links-list .link-row span.lname { flex: 1; font-weight: bold; }
+    .links-list .link-row span.lurl { flex: 1.5; color: var(--text-muted); font-size: 11px; }
+    .add-row { display: flex; gap: 6px; padding: 8px 12px; align-items: center; }
+    .add-row input { flex: 1; }
+  </style>
+</head>
+<body>
+
+  <div class="wrap">
+    <div class="topheader">
+      <h1>iVelt Pro – אנשטעלונגען</h1>
+      <div class="version">v1.0.0</div>
+    </div>
+
+    <div class="tabs">
+      <button class="nav-btn active" data-target="general">⚙️ אלגעמיין</button>
+      <button class="nav-btn" data-target="media">🎬 מידיע</button>
+      <button class="nav-btn" data-target="advanced">🔧 עקסטרא</button>
+      <button class="nav-btn" data-target="help-link" id="openHelp">❓ הילף</button>
+    </div>
+
+    <div class="content-area">
+
+      <!-- ===== General ===== -->
+      <div id="general" class="section active">
+        <h2 class="section-title">אלגעמיינע אפציעס</h2>
+
+        <div class="card">
+          <div class="card-title">הויפט פונקציעס</div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <h3>גיי גלייך צו אומגעליינטע תגובות</h3>
+              <p>ווען מען קליקט אויף א קעפל פון אן אשכול, וועט עס דיר טראגן גלייך צו די ערשטע אומגעליינטע תגובה.</p>
+            </div>
+            <label class="switch"><input type="checkbox" id="smartPagination"><span class="slider"></span></label>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <h3>פארקלענערן בילדער (Auto Resize)</h3>
+              <p>פארקלענערט אויטאמאטיש בילדער גרעסער פון 400KB ביים ארויפלאדן — דורכן פייל-פיקער, דרעג-און-דראפ, אדער פעיסט. גיפס בלייבן ווי זיי זענען.</p>
+            </div>
+            <label class="switch"><input type="checkbox" id="autoResizeImages"><span class="slider"></span></label>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <h3>גוגל סוירטש</h3>
+              <p>לייגט צו א גוגל סוירטש קעסטל אינעם פארום.</p>
+            </div>
+            <label class="switch"><input type="checkbox" id="googleSearch"><span class="slider"></span></label>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <h3>סטיקי תגובה קנעפלעך</h3>
+              <p>האלט די קנעפלעך אויפן סקרין בשעת'ן סקראלן א לאנגע תגובה.</p>
+            </div>
+            <label class="switch"><input type="checkbox" id="stickyPosts"><span class="slider"></span></label>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-info">
+              <h3>ווארענונג פאר פארלירן א נישט-געשיקטע תגובה</h3>
+              <p>ווייז א ווארענונג ווען מען וויל פארלאזן די בלאט מיט א נישט-געשיקטע תגובה אינעם קעסטל.</p>
+            </div>
+            <label class="switch"><input type="checkbox" id="warnOnLosingPost"><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">פאפ-אפ קוויק לינקס</div>
+          <div class="card-desc">לייג צו אייגענע לינקס וואס וועלן ארויפקומען אין די פאפ-אפ.</div>
+          <div class="links-list" id="customLinksContainer"></div>
+          <div class="add-row">
+            <input type="text" id="newLinkName" placeholder="נאמען (צ.ב.ש. מיין אשכול)">
+            <input type="text" id="newLinkUrl" placeholder="לינק (https://...)" dir="ltr">
+            <button class="btn" id="addLinkBtn">+ לייג צו</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Media ===== -->
+      <div id="media" class="section">
+        <h2 class="section-title">מידיע</h2>
+        <div class="card">
+          <div class="card-title">מידיע אפציעס</div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <h3>שפיל מידיע אינעווייניג</h3>
+              <p>עפנט גוגל דרייוו און דראפבאקס ווידעא/אודיאו לינקס אלס א פלעיער גלייך אויפן פארום.</p>
+            </div>
+            <label class="switch"><input type="checkbox" id="embeddedMedia"><span class="slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <h3>אידיש24 פלעיער</h3>
+              <p>שפילט אידיש24 רעקארדירונגען קליין און געשמאק דירעקט אויפן פארום.</p>
+            </div>
+            <label class="switch"><input type="checkbox" id="yiddish24Player"><span class="slider"></span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Advanced ===== -->
+      <div id="advanced" class="section">
+        <h2 class="section-title">עקסטרא פונקציעס</h2>
+
+        <div class="card">
+          <div class="card-title">תגובה קנעפלעך</div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <h3>דערמאן א ניק (@)</h3>
+              <p>לייגט צו א @ קנעפל גרינג צו דערמאנען א ניק מיטן ריכטיגן BBCode.</p>
+            </div>
+            <label class="switch"><input type="checkbox" id="mentionButton"><span class="slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <h3>קאפי לינק</h3>
+              <p>לייגט צו א קאפי קנעפל גרינג צו קאפירן די דירעקטע לינק צו יעדע תגובה.</p>
+            </div>
+            <label class="switch"><input type="checkbox" id="quoteOtherTopic"><span class="slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <h3>באוועגליכע קנעפלעך באר (Movable)</h3>
+              <p>ערלויבט צו ציען די תגובה-קנעפלעך באר פריי צו א נייע פלאץ אינעם תגובה. די פלאץ וועט אויטאמאטיש זיין געזעצט פאר אלע תגובות.</p>
+            </div>
+            <label class="switch"><input type="checkbox" id="movableButtonsBar"><span class="slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <h3>"ציטיר" פאפ-אפ ביים סעלעקטן טעקסט</h3>
+              <p>ווען מען סעלעקטירט ווערטער אין א תגובה, וועט ארויפקומען א "ציטיר" קנעפל. א קליק וועט אריינלייגן די געצילטע ווערטער (מיט די ריכטיגע quote טעגס) אינעם תגובה-קעסטל.</p>
+            </div>
+            <label class="switch"><input type="checkbox" id="citePopup"><span class="slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <h3>קאפיר ציטירטע תגובה אנשטאט אריינשרייבן</h3>
+              <p>ווען מען קליקט אויף די @ קנעפל וועט עס קאפירן צום קליפבארד אנשטאט גלייך אריינלייגן.</p>
+            </div>
+            <label class="switch"><input type="checkbox" id="alwaysCopyTopic"><span class="slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <h3>קיבארד שארטקאטס</h3>
+              <p>לאזט נוצן קיבארד שארטקאטס (עראוס, קאנטראל+ענטער, א.א.וו.).</p>
+            </div>
+            <label class="switch"><input type="checkbox" id="keyboardShortcuts"><span class="slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <h3>באהאלט אשכולות</h3>
+              <p>לייגט צו אן אויג קנעפל ביי יעדע אשכול.</p>
+            </div>
+            <label class="switch"><input type="checkbox" id="topicHider"><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">נאטיפיקאציעס</div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <h3>צעטייל נאטיפיקאציעס</h3>
+              <p>צעטיילט די נאטיפיקאציע גלאק אין עקסטרא גלעקלעך פאר באדאנקט, דערמאנט און ציטירט.</p>
+            </div>
+            <label class="switch"><input type="checkbox" id="notificationSplitter"><span class="slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <h3>נאטיפיקאציע פאר נייע תגובות</h3>
+              <p>דער טעב טייטל וועט בלינקן ווען איינער שרייבט א נייע תגובה אין דעם אשכול.</p>
+            </div>
+            <label class="switch"><input type="checkbox" id="newResponseNotification"><span class="slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <h3>פוש נאטיפיקאציעס</h3>
+              <p>באקום א ווינדאוס נאטיפיקאציע ווען די באקומסט נייע נאטיפיקאציעס אויפן פארום.</p>
+            </div>
+            <label class="switch"><input type="checkbox" id="pushNotifications"><span class="slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <h3>זוך פרישע תגובות יעדע</h3>
+              <p>אינטערוואל פאר אינעווייניגסטע באקגראונד-זוכן.</p>
+            </div>
+            <select id="backgroundSyncPosts">
+              <option value="20000">20 סעקונדעס</option>
+              <option value="60000">מינוט</option>
+              <option value="0">זוך נישט</option>
+            </select>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <h3>זוך פרישע נאטיפיקאציעס יעדע</h3>
+              <p>אינטערוואל פאר באקגראונד נאטיפיקאציע-זוכן.</p>
+            </div>
+            <select id="backgroundSyncNotif">
+              <option value="1">מינוט</option>
+              <option value="5">5 מינוט</option>
+              <option value="0">זוך נישט</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">דיבאג</div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <h3>דיבאג מאוד</h3>
+              <p>שרייב דעטאלן אינעם בראוזער קאנסאל. נוצליך פאר טראבלשוטן.</p>
+            </div>
+            <label class="switch"><input type="checkbox" id="debugMode"><span class="slider"></span></label>
+          </div>
+          <div class="setting-row">
+            <div class="setting-info">
+              <h3>רעסעט די באוועגליכע קנעפלעך באר</h3>
+              <p>שטעל צוריק די פלאץ פון די תגובה-קנעפלעך באר.</p>
+            </div>
+            <button class="btn btn-danger" id="resetButtonsBar">רעסעט</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="saveToast" class="save-toast">✓ סעיווד!</div>
+
+  <script type="module" src="./settings.ts"></script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "name": "iVelt Pro",
+  "version": "1.0.0",
+  "description": "Unified, modern extension for iVelt.com combining Helper, Media, and custom Themes.",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch"
+  },
+  "devDependencies": {
+    "@crxjs/vite-plugin": "^2.3.0",
+    "@types/chrome": "^0.1.37",
+    "typescript": "^5.2.2",
+    "vite": "^5.0.0"
+  }
+}
