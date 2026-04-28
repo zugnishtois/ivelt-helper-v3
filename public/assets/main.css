@@ -51,22 +51,19 @@
   pointer-events: none;
   z-index: 2;
 }
+/* Ghost rectangle showing the exact bar bounds at each anchor */
 .ivelt-pro-snap-zone {
   position: absolute;
-  width: 24px;
-  height: 24px;
-  margin: -12px 0 0 -12px;
-  border-radius: 50%;
-  background: rgba(18, 163, 235, 0.18);
-  border: 2px dashed rgba(18, 163, 235, 0.55);
-  transition: transform 0.12s ease, background 0.12s ease, border-color 0.12s ease;
+  border-radius: 4px;
+  background: rgba(18, 163, 235, 0.08);
+  border: 2px dashed rgba(18, 163, 235, 0.45);
+  transition: background 0.12s ease, border-color 0.12s ease;
 }
 .ivelt-pro-snap-zone.is-active {
-  background: rgba(18, 163, 235, 0.45);
+  background: rgba(18, 163, 235, 0.22);
   border-color: rgba(18, 163, 235, 1);
   border-style: solid;
-  transform: scale(1.4);
-  box-shadow: 0 0 0 4px rgba(18, 163, 235, 0.15);
+  box-shadow: 0 0 0 2px rgba(18, 163, 235, 0.2);
 }
 .post .post-buttons.ivelt-pro-movable .ivelt-pro-drag-handle {
   display: inline-block;

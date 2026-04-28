@@ -234,17 +234,22 @@ function buildSnapOverlay(postWrap: HTMLElement, bar: HTMLElement): SnapOverlay 
   root.className = 'ivelt-pro-snap-overlay';
   postWrap.appendChild(root);
 
+  // Capture the bar's size ONCE (it won't change while dragging) so each
+  // marker renders as a ghost rectangle of the exact dimensions and position
+  // the bar will occupy at that anchor.
+  const barRect = bar.getBoundingClientRect();
+  const W = barRect.width;
+  const H = barRect.height;
+
   const markers = new Map<ButtonsBarAnchor, HTMLDivElement>();
   for (const a of ALLOWED_ANCHORS) {
     const m = document.createElement('div');
     m.className = `ivelt-pro-snap-zone snap-${a}`;
     const { left, top } = anchorPx(postWrap, bar, a);
-    const barRect = bar.getBoundingClientRect();
-    // Place marker centered on where the bar's CENTER would land
-    const cx = left + barRect.width  / 2;
-    const cy = top  + barRect.height / 2;
-    m.style.left = `${cx}px`;
-    m.style.top  = `${cy}px`;
+    m.style.left = `${left}px`;
+    m.style.top  = `${top}px`;
+    m.style.width  = `${W}px`;
+    m.style.height = `${H}px`;
     root.appendChild(m);
     markers.set(a, m);
   }
