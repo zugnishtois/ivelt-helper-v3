@@ -34,10 +34,15 @@
 }
 
 /* -- Movable post-buttons bar (snap to 5 anchors) -- */
-/* Force phpBB's `.postbody { position: relative }` off so .post becomes
-   the containing block — otherwise the absolute bar is positioned against
-   postbody and the snap-zone overlay (in .post) doesn't line up. */
-.post.has-profile.ivelt-pro-has-movable-bar > .postbody {
+/* Real DOM (phpBB prosilver):
+     .post.has-profile > .inner > .postbody > #post_content<id> > .post-buttons
+   phpBB sets `.postbody { position: relative }` natively, which would capture
+   our absolute bar before reaching .post. Force EVERY wrapper between .post
+   and the bar to `static` so .post (which we set to relative) is the actual
+   containing block, matching where our snap-zone overlay is rendered. */
+.post.has-profile.ivelt-pro-has-movable-bar .inner,
+.post.has-profile.ivelt-pro-has-movable-bar .postbody,
+.post.has-profile.ivelt-pro-has-movable-bar [id^="post_content"] {
   position: static !important;
 }
 .post .post-buttons.ivelt-pro-movable {

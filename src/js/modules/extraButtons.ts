@@ -152,7 +152,7 @@ export function setupExtraButtons(cfg: ExtraButtonsConfig) {
     if (cfg.movableBar) {
       console.log('[iVeltPro:movableBar] wiring post', {
         post_id: post.id,
-        postbody_native_position: window.getComputedStyle(postBody).position,
+        postbody_native_position: postBody ? window.getComputedStyle(postBody).position : '<no postbody>',
         post_native_position: window.getComputedStyle(post as HTMLElement).position,
         savedPos: cfg.savedPosition,
       });
