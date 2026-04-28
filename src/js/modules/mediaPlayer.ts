@@ -50,21 +50,28 @@ export function setupMediaPlayer() {
       const cont = document.createElement('div');
       cont.className = `media-container ${isAudio ? 'is-audio' : ''}`;
 
+      const expand = () => cont.classList.add('is-expanded');
+
       if (item.type === 'google-drive') {
-        // Drive iframes are cross-origin so we can't read 'play' events.
-        // Auto-expand on FIRST click into the iframe via the focus-blur trick:
-        // when an iframe receives a click, the parent window's focus is lost
-        // and document.activeElement becomes the iframe.
+        // Drive iframes are cross-origin → can't observe `play`.
+        // Use TWO triggers (whichever fires first):
+        //   a) `mousedown` on the container BEFORE the click reaches the iframe
+        //      (capture phase, while we still own the event)
+        //   b) Window blur + activeElement === iframe (covers keyboard/touch)
         cont.innerHTML = `
           <iframe src="https://drive.google.com/file/d/${item.id}/preview"
                   frameborder="0" loading="lazy" scrolling="no" allowfullscreen></iframe>
         `;
         const iframe = cont.querySelector('iframe') as HTMLIFrameElement;
+
+        // (a) mousedown captures the very first interaction with the player area
+        cont.addEventListener('mousedown', expand, { capture: true, once: true });
+
+        // (b) blur fallback for when the click lands directly inside the iframe
         const onBlur = () => {
-          // Defer so document.activeElement updates first
           setTimeout(() => {
             if (document.activeElement === iframe) {
-              cont.classList.add('is-expanded');
+              expand();
               window.removeEventListener('blur', onBlur);
             }
           }, 0);
@@ -77,9 +84,10 @@ export function setupMediaPlayer() {
           </video>
         `;
         const video = cont.querySelector('video') as HTMLVideoElement;
-        // Expand on play OR on any click into the player.
-        video.addEventListener('play', () => cont.classList.add('is-expanded'));
-        video.addEventListener('click', () => cont.classList.add('is-expanded'));
+        // Multiple triggers: any of these reliably means "user is using the player".
+        video.addEventListener('play', expand);
+        video.addEventListener('click', expand);
+        cont.addEventListener('click', expand);
       }
 
       const links = document.createElement('div');

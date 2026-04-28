@@ -278,6 +278,13 @@ function enableFreeDrag(
     postWrap.style.position = 'relative';
   }
 
+  // phpBB sets `.postbody { position: relative }` natively, which would
+  // capture our absolutely-positioned bar (the bar would be relative to
+  // postbody instead of the .post wrapper, and the ghost rectangles
+  // wouldn't match). Force postbody to `static` so the .post becomes the
+  // actual containing block.
+  postWrap.classList.add('ivelt-pro-has-movable-bar');
+
   // top-right not allowed; fall back to top-center if it was saved.
   let initialAnchor: ButtonsBarAnchor = (savedPos as ButtonsBarAnchor) || 'tl';
   if (initialAnchor === 'tr') initialAnchor = 'tc';

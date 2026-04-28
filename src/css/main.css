@@ -34,6 +34,12 @@
 }
 
 /* -- Movable post-buttons bar (snap to 5 anchors) -- */
+/* Force phpBB's `.postbody { position: relative }` off so .post becomes
+   the containing block — otherwise the absolute bar is positioned against
+   postbody and the snap-zone overlay (in .post) doesn't line up. */
+.post.has-profile.ivelt-pro-has-movable-bar > .postbody {
+  position: static !important;
+}
 .post .post-buttons.ivelt-pro-movable {
   position: absolute !important;
   z-index: 10;         /* above embedded media (iframes/videos), below site dropdowns */
@@ -304,9 +310,12 @@
   background: #000;
 }
 
-/* Expanded (after play / clicking ⤢): full content width with 16:9 ratio */
+/* Expanded (after play / first click): full content width with 16:9 ratio */
 .ivelt-pro-media-root .media-container.is-expanded {
-  width: 100%;
+  width: 100% !important;
+}
+.ivelt-pro-media-root .media-item:has(.media-container.is-expanded) {
+  width: 100% !important;
 }
 
 /* Audio (.mp3) — short bar, transparent */
