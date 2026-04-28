@@ -125,8 +125,9 @@ export function setupNewResponseNotification() {
         currentCount = newCount + 1; // bump so we don't keep firing for same delta
       }
       window.setTimeout(checkNewResponse, interval);
-    } catch (err) {
-      console.error("iVelt Pro: error checking new responses", err);
+    } catch {
+      // Transient fetch failure (offline / aborted / network blip).
+      // Back off and retry — no console noise; recovery is automatic.
       interval = Math.min(interval * 2, 5 * 60 * 1000);
       window.setTimeout(checkNewResponse, interval);
     }

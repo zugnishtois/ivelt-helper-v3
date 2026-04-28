@@ -95,8 +95,9 @@ async function checkForNotifications() {
 
     await chrome.storage.local.set({ [LAST_COUNT_KEY]: newCount });
     
-  } catch (error) {
-    console.error('iVelt Pro: Notification check failed:', error);
+  } catch {
+    // Transient fetch failure (offline / cookie expired / network blip).
+    // The poll runs again on the next alarm tick — no need to surface it.
   }
 }
 
