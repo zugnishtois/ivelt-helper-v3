@@ -2,8 +2,8 @@
  * iVelt Pro — Embedded Media Player.
  *
  * Replaces Google Drive / Dropbox file links inside post content with
- * an inline player. Sized SMALL by default; expands to full size when
- * the user starts playing (or clicks the expand button on Drive iframes).
+ * an inline player. Sized SMALL by default; EXPAND_PLACEHOLDERs to full size when
+ * the user starts playing (or clicks the EXPAND_PLACEHOLDER button on Drive iframes).
  */
 
 export function setupMediaPlayer() {
@@ -50,28 +50,33 @@ export function setupMediaPlayer() {
       const cont = document.createElement('div');
       cont.className = `media-container ${isAudio ? 'is-audio' : ''}`;
 
-      const expand = () => cont.classList.add('is-expanded');
+      const expandHandler = (why: string) => () => {
+        cont.classList.add('is-expanded');
+        const cs = window.getComputedStyle(cont);
+        console.log(`[iVeltPro:mediaExpand] trigger=${why}`, {
+          type: item.type,
+          has_class: cont.classList.contains('is-expanded'),
+          width_after: cs.width,
+          aspect_ratio: cs.aspectRatio,
+          parent_width: (cont.parentElement as HTMLElement)?.getBoundingClientRect().width,
+        });
+      };
 
       if (item.type === 'google-drive') {
-        // Drive iframes are cross-origin → can't observe `play`.
-        // Use TWO triggers (whichever fires first):
-        //   a) `mousedown` on the container BEFORE the click reaches the iframe
-        //      (capture phase, while we still own the event)
-        //   b) Window blur + activeElement === iframe (covers keyboard/touch)
         cont.innerHTML = `
           <iframe src="https://drive.google.com/file/d/${item.id}/preview"
                   frameborder="0" loading="lazy" scrolling="no" allowfullscreen></iframe>
         `;
         const iframe = cont.querySelector('iframe') as HTMLIFrameElement;
 
-        // (a) mousedown captures the very first interaction with the player area
-        cont.addEventListener('mousedown', expand, { capture: true, once: true });
+        // Capture-phase mousedown on the container — fires BEFORE the click reaches the iframe.
+        cont.addEventListener('mousedown', expandHandler('iframe-mousedown'), { capture: true, once: true });
 
-        // (b) blur fallback for when the click lands directly inside the iframe
+        // Fallback: window-blur + activeElement === iframe (touch / keyboard / focus).
         const onBlur = () => {
           setTimeout(() => {
             if (document.activeElement === iframe) {
-              expand();
+              expandHandler('iframe-blur')();
               window.removeEventListener('blur', onBlur);
             }
           }, 0);
@@ -84,10 +89,9 @@ export function setupMediaPlayer() {
           </video>
         `;
         const video = cont.querySelector('video') as HTMLVideoElement;
-        // Multiple triggers: any of these reliably means "user is using the player".
-        video.addEventListener('play', expand);
-        video.addEventListener('click', expand);
-        cont.addEventListener('click', expand);
+        video.addEventListener('play',  expandHandler('video-play'));
+        video.addEventListener('click', expandHandler('video-click'));
+        cont.addEventListener('click',  expandHandler('container-click'));
       }
 
       const links = document.createElement('div');
