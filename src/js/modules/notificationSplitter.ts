@@ -76,9 +76,9 @@ export function setupNotificationSplitter() {
       if (ul) {
         ul.innerHTML = '';
         items.forEach(item => {
-          // Force all notification links to open in a new tab so we don't lose typed text
+          // Same-tab navigation (matches forum default behavior).
           const itemLink = item.querySelector('a');
-          if (itemLink) itemLink.target = '_blank';
+          if (itemLink) itemLink.removeAttribute('target');
           ul.appendChild(item);
         });
       }

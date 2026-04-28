@@ -1,4 +1,4 @@
-import { saveSettings, loadSettings, ButtonsBarPosition, ExtensionSettings } from '../stateManager';
+import { saveSettings, loadSettings, ButtonsBarPosition } from '../stateManager';
 
 export interface ExtraButtonsConfig {
   enableMention: boolean;
@@ -155,7 +155,51 @@ export function setupExtraButtons(cfg: ExtraButtonsConfig) {
   });
 }
 
-/* ---------- Free-drag movable button bar (constrained to its postbody) ---------- */
+/* ---------- Anchor-snap movable button bar ---------- */
+/*
+   Snaps to one of 6 anchors inside its own postbody:
+     tl (top-left), tc (top-center), tr (top-right)
+     bl (bottom-left), bc (bottom-center), br (bottom-right)
+   Drag handle (⠿) is hover-only — appears when the user hovers the bar.
+*/
+
+import type { ButtonsBarAnchor } from '../stateManager';
+
+const ALL_ANCHORS: ButtonsBarAnchor[] = ['tl', 'tc', 'tr', 'bl', 'bc', 'br'];
+
+function applyAnchor(bar: HTMLElement, anchor: ButtonsBarAnchor) {
+  // Reset all four edge properties first.
+  bar.style.left = '';
+  bar.style.right = '';
+  bar.style.top = '';
+  bar.style.bottom = '';
+  bar.style.transform = '';
+
+  switch (anchor) {
+    case 'tl': bar.style.top = '0';  bar.style.left  = '0'; break;
+    case 'tc': bar.style.top = '0';  bar.style.left  = '50%'; bar.style.transform = 'translateX(-50%)'; break;
+    case 'tr': bar.style.top = '0';  bar.style.right = '0'; break;
+    case 'bl': bar.style.bottom = '0'; bar.style.left  = '0'; break;
+    case 'bc': bar.style.bottom = '0'; bar.style.left  = '50%'; bar.style.transform = 'translateX(-50%)'; break;
+    case 'br': bar.style.bottom = '0'; bar.style.right = '0'; break;
+  }
+}
+
+function nearestAnchor(xPct: number, yPct: number): ButtonsBarAnchor {
+  // Anchors as (x%, y%) reference points
+  const points: Record<ButtonsBarAnchor, [number, number]> = {
+    tl: [0, 0],   tc: [50, 0],   tr: [100, 0],
+    bl: [0, 100], bc: [50, 100], br: [100, 100],
+  };
+  let best: ButtonsBarAnchor = 'tl';
+  let bestDist = Infinity;
+  for (const a of ALL_ANCHORS) {
+    const [px, py] = points[a];
+    const d = (px - xPct) ** 2 + (py - yPct) ** 2;
+    if (d < bestDist) { bestDist = d; best = a; }
+  }
+  return best;
+}
 
 function enableFreeDrag(
   bar: HTMLElement,
@@ -166,18 +210,12 @@ function enableFreeDrag(
   bar.dataset.iveltMovable = '1';
   bar.classList.add('ivelt-pro-movable');
 
-  // Make sure the bar's parent is a positioning context
-  const cs = window.getComputedStyle(postBody);
-  if (cs.position === 'static') postBody.style.position = 'relative';
+  if (window.getComputedStyle(postBody).position === 'static') {
+    postBody.style.position = 'relative';
+  }
 
-  const apply = (xPct: number, yPct: number) => {
-    bar.style.left = `${clamp(xPct, 0, 100)}%`;
-    bar.style.top  = `${clamp(yPct, 0, 100)}%`;
-    bar.style.right = 'auto';
-    bar.style.bottom = 'auto';
-  };
-
-  if (savedPos) apply(savedPos.xPct, savedPos.yPct);
+  const initialAnchor: ButtonsBarAnchor = (savedPos as ButtonsBarAnchor) || 'tl';
+  applyAnchor(bar, initialAnchor);
 
   if (!bar.querySelector('.ivelt-pro-drag-handle')) {
     const handle = document.createElement('span');
@@ -187,8 +225,8 @@ function enableFreeDrag(
     bar.appendChild(handle);
 
     let dragging = false;
+    let ghostLeft = 0, ghostTop = 0; // px relative to postBody
     let startX = 0, startY = 0;
-    let origLeft = 0, origTop = 0;
 
     handle.addEventListener('mousedown', (e: MouseEvent) => {
       e.preventDefault();
@@ -198,24 +236,28 @@ function enableFreeDrag(
 
       const rect = bar.getBoundingClientRect();
       const parentRect = postBody.getBoundingClientRect();
-      origLeft = rect.left - parentRect.left;
-      origTop  = rect.top  - parentRect.top;
+      ghostLeft = rect.left - parentRect.left;
+      ghostTop  = rect.top  - parentRect.top;
       startX = e.clientX;
       startY = e.clientY;
+
+      // While dragging, switch to free-position so the ghost can move
+      bar.style.left = `${ghostLeft}px`;
+      bar.style.top  = `${ghostTop}px`;
+      bar.style.right = 'auto';
+      bar.style.bottom = 'auto';
+      bar.style.transform = '';
 
       const onMove = (mv: MouseEvent) => {
         if (!dragging) return;
         const parentR = postBody.getBoundingClientRect();
         const barR = bar.getBoundingClientRect();
-        // Clamp so the bar stays inside its own postbody
         const maxLeft = parentR.width  - barR.width;
         const maxTop  = parentR.height - barR.height;
-        const newLeft = clamp(origLeft + (mv.clientX - startX), 0, Math.max(0, maxLeft));
-        const newTop  = clamp(origTop  + (mv.clientY - startY), 0, Math.max(0, maxTop));
-        bar.style.left = `${(newLeft / parentR.width)  * 100}%`;
-        bar.style.top  = `${(newTop  / parentR.height) * 100}%`;
-        bar.style.right = 'auto';
-        bar.style.bottom = 'auto';
+        const newLeft = clamp(ghostLeft + (mv.clientX - startX), 0, Math.max(0, maxLeft));
+        const newTop  = clamp(ghostTop  + (mv.clientY - startY), 0, Math.max(0, maxTop));
+        bar.style.left = `${newLeft}px`;
+        bar.style.top  = `${newTop}px`;
       };
 
       const onUp = async () => {
@@ -227,22 +269,22 @@ function enableFreeDrag(
 
         const parentR = postBody.getBoundingClientRect();
         const barR = bar.getBoundingClientRect();
-        const xPct = ((barR.left - parentR.left) / parentR.width)  * 100;
-        const yPct = ((barR.top  - parentR.top)  / parentR.height) * 100;
+        // Center of bar as % of postbody
+        const cx = ((barR.left - parentR.left) + barR.width  / 2) / parentR.width  * 100;
+        const cy = ((barR.top  - parentR.top)  + barR.height / 2) / parentR.height * 100;
+        const anchor = nearestAnchor(cx, cy);
 
-        await saveSettings({ buttonsBarPosition: { xPct, yPct } });
+        applyAnchor(bar, anchor);
+        await saveSettings({ buttonsBarPosition: anchor });
 
-        // Apply to ALL movable bars on the page so the user's choice is global.
+        // Propagate to every other movable bar on the page.
         document.querySelectorAll<HTMLElement>('.post-buttons.ivelt-pro-movable').forEach(other => {
+          if (other === bar) return;
           const otherParent = other.parentElement as HTMLElement | null;
-          if (!otherParent) return;
-          if (window.getComputedStyle(otherParent).position === 'static') {
+          if (otherParent && window.getComputedStyle(otherParent).position === 'static') {
             otherParent.style.position = 'relative';
           }
-          other.style.left = `${clamp(xPct, 0, 100)}%`;
-          other.style.top  = `${clamp(yPct, 0, 100)}%`;
-          other.style.right = 'auto';
-          other.style.bottom = 'auto';
+          applyAnchor(other, anchor);
         });
       };
 

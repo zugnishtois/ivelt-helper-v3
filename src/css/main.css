@@ -33,10 +33,10 @@
   box-shadow: 0 1px 3px rgba(52,119,219,0.25);
 }
 
-/* -- Movable post-buttons bar (free drag) -- */
+/* -- Movable post-buttons bar (snap to 6 anchors) -- */
 .post .post-buttons.ivelt-pro-movable {
   position: absolute;
-  z-index: 5;
+  z-index: 1;        /* below site dropdowns/menus */
 }
 .post .post-buttons.ivelt-pro-movable .ivelt-pro-drag-handle {
   display: inline-block;
@@ -45,14 +45,21 @@
   padding: 0 4px;
   color: #888;
   font-size: 11px;
-  opacity: 0.55;
+  opacity: 0;        /* hidden by default — appears on hover */
   user-select: none;
   vertical-align: middle;
+  transition: opacity 0.15s ease;
+}
+/* Show handle when hovering the buttons bar (or while dragging) */
+.post .post-buttons.ivelt-pro-movable:hover .ivelt-pro-drag-handle,
+.post .post-buttons.ivelt-pro-dragging .ivelt-pro-drag-handle {
+  opacity: 0.55;
 }
 .post .post-buttons.ivelt-pro-movable .ivelt-pro-drag-handle:hover { opacity: 1; }
 .post .post-buttons.ivelt-pro-dragging {
-  opacity: 0.75;
+  opacity: 0.85;
   box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+  z-index: 2;
 }
 
 /* -- Quote-selection floating popup (ציטיר) -- */
