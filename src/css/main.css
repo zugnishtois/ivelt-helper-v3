@@ -100,6 +100,20 @@
   z-index: 11;
 }
 
+/* Sticky-on-scroll: pin to viewport top while post is partially in view.
+   Higher specificity than .ivelt-pro-movable (4 classes vs 3) so its
+   position: fixed wins over the movable's position: absolute. */
+.post .post-buttons.ivelt-pro-movable.ivelt-pro-stuck {
+  position: fixed !important;
+  z-index: 20 !important;
+  background-color: rgba(202, 220, 235, 0.85);
+  border: 1px solid #C7C3BF;
+  padding: 4px 6px;
+  border-radius: 6px;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
 /* -- Quote-selection floating popup (ציטיר) -- */
 #ivelt-pro-cite-popup {
   position: absolute;
@@ -268,23 +282,23 @@
    Background sits only around the actual player (not the full row). */
 .ivelt-pro-media-root {
   margin: 12px 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  align-items: flex-start;     /* don't stretch to full row width */
+  display: block;             /* block, not flex — flex was preventing
+                                 the expanded child from growing */
 }
 .ivelt-pro-media-root .media-item {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  display: inline-block;
+  vertical-align: top;
+  margin: 6px 0;
   padding: 10px;
   border-left: solid #60a5fa 3px;
   background: #dbeafe;
-  width: fit-content;          /* hug the player */
+  width: fit-content;
   max-width: 100%;
+  box-sizing: border-box;
 }
 .ivelt-pro-media-root .media-item:has(.media-container.is-expanded) {
-  width: 100%;                 /* expand the wrapper too on play */
+  display: block !important;
+  width: 100% !important;
 }
 .ivelt-pro-media-root .media-links {
   font-size: 0.85rem;

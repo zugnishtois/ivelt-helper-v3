@@ -7,6 +7,10 @@ export function setupStickyPosts() {
     let firstStickyFound = false;
 
     postButtons.forEach((btn) => {
+      // When the movable-bar feature is on, that module owns sticky-on-scroll
+      // for this bar. Don't double-process or the two modules fight.
+      if (btn.classList.contains('ivelt-pro-movable')) return;
+
       const parent = btn.parentElement;
       if (!parent) return;
 

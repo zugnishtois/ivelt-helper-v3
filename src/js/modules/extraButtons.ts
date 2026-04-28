@@ -39,11 +39,10 @@ export function setupExtraButtons(cfg: ExtraButtonsConfig) {
     const timeEl = post.querySelector('time') as HTMLTimeElement;
     const postTime = timeEl ? Math.floor(Date.parse(timeEl.dateTime) / 1000).toString() : '';
 
-    if (!postButtons.querySelector('.ivelt-pro-mention-btn') &&
-        !postButtons.querySelector('.ivelt-pro-quote-btn') &&
-        !postButtons.querySelector('.ivelt-pro-cite-other-btn') &&
-        !postButtons.querySelector('.ivelt-pro-cite-last-btn')) {
-
+    {
+      // Per-button existence check: only skip buttons that are already there.
+      // (Was: skipping ALL buttons if any one existed, which is why some posts
+      // were missing some of the buttons.)
       const existingQuoteBtn = postButtons.querySelector('i.icon.fa-quote-left')?.closest('li');
       const existingQuoteHref = existingQuoteBtn?.querySelector('a')?.getAttribute('href') || '';
       let lastInserted: Element | null = existingQuoteBtn || null;
@@ -58,7 +57,7 @@ export function setupExtraButtons(cfg: ExtraButtonsConfig) {
       };
 
       // === @ Mention ===
-      if (cfg.enableMention) {
+      if (cfg.enableMention && !postButtons.querySelector('.ivelt-pro-mention-btn')) {
         const li = document.createElement('li');
         li.innerHTML = `
           <a class="button button-icon-only custom-btn ivelt-pro-mention-btn" title="דערמאן א ניק (Mention)">
@@ -79,7 +78,7 @@ export function setupExtraButtons(cfg: ExtraButtonsConfig) {
       }
 
       // === Copy Link ===
-      if (cfg.enableCopyLink) {
+      if (cfg.enableCopyLink && !postButtons.querySelector('.ivelt-pro-quote-btn')) {
         const li = document.createElement('li');
         li.innerHTML = `
           <a class="button button-icon-only custom-btn ivelt-pro-quote-btn" title="קאפי לינק (Copy Link)">
@@ -108,7 +107,7 @@ export function setupExtraButtons(cfg: ExtraButtonsConfig) {
       }
 
       // === ציטיר אין אנדערע אשכול === (full BBCode quote + url)
-      if (cfg.enableCiteOtherTopic) {
+      if (cfg.enableCiteOtherTopic && !postButtons.querySelector('.ivelt-pro-cite-other-btn')) {
         const li = document.createElement('li');
         li.innerHTML = `
           <a class="button button-icon-only custom-btn ivelt-pro-cite-other-btn" title="ציטיר אין אנדערע אשכול">
@@ -132,7 +131,7 @@ export function setupExtraButtons(cfg: ExtraButtonsConfig) {
       }
 
       // === ציטיר לעצטע === (last quote only)
-      if (cfg.enableCiteLast && existingQuoteHref) {
+      if (cfg.enableCiteLast && existingQuoteHref && !postButtons.querySelector('.ivelt-pro-cite-last-btn')) {
         const content = postWrap.querySelector('.content');
         const hasInnerQuote = content?.innerHTML.includes('blockquote');
         if (hasInnerQuote) {
@@ -171,25 +170,32 @@ import type { ButtonsBarAnchor } from '../stateManager';
 const ALLOWED_ANCHORS: ButtonsBarAnchor[] = ['tl', 'tc', 'bl', 'bc', 'br'];
 
 function anchorPx(postWrap: HTMLElement, bar: HTMLElement, anchor: ButtonsBarAnchor) {
-  // clientWidth/Height give the padding-box dims — that's exactly the area
-  // an absolutely-positioned child is positioned against. getBoundingClientRect
-  // returns the border-box, which is wider/taller than the positioning area
-  // when the parent has any border, and that mismatch is what was offsetting
-  // the ghost rectangles vs. where the bar actually lands.
-  const W = postWrap.clientWidth;
+  // Position vertically relative to the WHOLE .post (so bottom = real bottom
+  // of the post, even when the profile/avatar column makes it taller than
+  // postbody). Position horizontally relative to the .postbody — that's
+  // where phpBB natively renders the post-buttons, so "left" matches the
+  // visual edge of the content area and avatars don't trespass on it.
+  const postRect = postWrap.getBoundingClientRect();
+  const postbody = (postWrap.querySelector('.postbody') as HTMLElement) || postWrap;
+  const pbRect = postbody.getBoundingClientRect();
+
   const H = postWrap.clientHeight;
+  const xMin = pbRect.left - postRect.left;          // left edge of postbody within post
+  const xMax = pbRect.right - postRect.left;         // right edge of postbody within post
+  const pbWidth = xMax - xMin;
+
   const barRect = bar.getBoundingClientRect();
   const bw = barRect.width  || 200;
   const bh = barRect.height || 32;
 
   let left = 0, top = 0;
   switch (anchor) {
-    case 'tl': left = 0;            top = 0;            break;
-    case 'tc': left = (W - bw) / 2; top = 0;            break;
-    case 'tr': left = W - bw;       top = 0;            break;
-    case 'bl': left = 0;            top = H - bh;       break;
-    case 'bc': left = (W - bw) / 2; top = H - bh;       break;
-    case 'br': left = W - bw;       top = H - bh;       break;
+    case 'tl': left = xMin;                       top = 0;            break;
+    case 'tc': left = xMin + (pbWidth - bw) / 2;  top = 0;            break;
+    case 'tr': left = xMax - bw;                  top = 0;            break;
+    case 'bl': left = xMin;                       top = H - bh;       break;
+    case 'bc': left = xMin + (pbWidth - bw) / 2;  top = H - bh;       break;
+    case 'br': left = xMax - bw;                  top = H - bh;       break;
   }
   return { left: Math.max(0, left), top: Math.max(0, top) };
 }
@@ -382,7 +388,6 @@ function enableFreeDrag(
       const cur = (bar.dataset.iveltAnchor as ButtonsBarAnchor) || initialAnchor;
       applyAnchor(bar, postWrap, cur);
     });
-    // Also re-apply when the post resizes (media expanding, etc).
     if ('ResizeObserver' in window) {
       const ro = new ResizeObserver(() => {
         const cur = (bar.dataset.iveltAnchor as ButtonsBarAnchor) || initialAnchor;
@@ -390,7 +395,42 @@ function enableFreeDrag(
       });
       ro.observe(postWrap);
     }
+    // Sticky-on-scroll: while the post is partially scrolled past the top,
+    // pin the bar to the viewport top so it stays visible — including in
+    // posts with embedded media at bottom-anchor.
+    enableStickyOnScroll(bar, postWrap);
   }
+}
+
+function enableStickyOnScroll(bar: HTMLElement, postWrap: HTMLElement) {
+  const STICKY_TOP = 5;
+  let stuck = false;
+
+  const onScroll = () => {
+    const r = postWrap.getBoundingClientRect();
+    // Stick once the post has scrolled past the top by at least the bar's height,
+    // and only while at least 40px of the post is still on-screen.
+    const shouldStick = r.top < 0 && r.bottom > 60;
+    if (shouldStick && !stuck) {
+      // Capture current viewport-x of the bar so it stays in the same column.
+      const barR = bar.getBoundingClientRect();
+      bar.dataset.iveltStuckLeft = `${barR.left}px`;
+      bar.classList.add('ivelt-pro-stuck');
+      bar.style.left = `${barR.left}px`;
+      bar.style.top = `${STICKY_TOP}px`;
+      bar.style.right = 'auto';
+      bar.style.bottom = 'auto';
+      stuck = true;
+    } else if (!shouldStick && stuck) {
+      bar.classList.remove('ivelt-pro-stuck');
+      const cur = (bar.dataset.iveltAnchor as ButtonsBarAnchor) || 'tl';
+      applyAnchor(bar, postWrap, cur);
+      stuck = false;
+    }
+  };
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll, { passive: true });
 }
 
 function clamp(v: number, lo: number, hi: number) { return Math.max(lo, Math.min(hi, v)); }
