@@ -33,10 +33,40 @@
   box-shadow: 0 1px 3px rgba(52,119,219,0.25);
 }
 
-/* -- Movable post-buttons bar (snap to 6 anchors) -- */
+/* -- Movable post-buttons bar (snap to 5 anchors) -- */
 .post .post-buttons.ivelt-pro-movable {
+  position: absolute !important;
+  z-index: 1;          /* below site dropdowns/menus */
+  width: auto !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  display: inline-flex !important;
+  flex-wrap: nowrap !important;
+}
+/* Snap-zone overlay (visible only during drag) */
+.ivelt-pro-snap-overlay {
   position: absolute;
-  z-index: 1;        /* below site dropdowns/menus */
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+.ivelt-pro-snap-zone {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  margin: -12px 0 0 -12px;
+  border-radius: 50%;
+  background: rgba(18, 163, 235, 0.18);
+  border: 2px dashed rgba(18, 163, 235, 0.55);
+  transition: transform 0.12s ease, background 0.12s ease, border-color 0.12s ease;
+}
+.ivelt-pro-snap-zone.is-active {
+  background: rgba(18, 163, 235, 0.45);
+  border-color: rgba(18, 163, 235, 1);
+  border-style: solid;
+  transform: scale(1.4);
+  box-shadow: 0 0 0 4px rgba(18, 163, 235, 0.15);
 }
 .post .post-buttons.ivelt-pro-movable .ivelt-pro-drag-handle {
   display: inline-block;
@@ -225,60 +255,76 @@
 }
 
 /* -- Embedded Media Player -- */
+/* Matches the old ivelt-media extension: full container width with 16:9 aspect
+   ratio when expanded. Starts compact (thumbnail size) and grows on play. */
 .ivelt-pro-media-root {
-  margin: 8px 0;
+  margin: 12px 0;
+  padding: 10px;
+  border-left: solid #60a5fa 3px;
+  background: #dbeafe;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 .ivelt-pro-media-root .media-item {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 .ivelt-pro-media-root .media-links {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
+  display: flex;
+  gap: 1rem;
 }
+
+/* Compact (default, before play) */
 .ivelt-pro-media-root .media-container {
   position: relative;
+  isolation: isolate;
   width: 320px;
   max-width: 100%;
+  aspect-ratio: 16 / 9;
   background: #000;
   border-radius: 6px;
   overflow: hidden;
-  transition: width 0.25s ease, height 0.25s ease;
+  transition: width 0.3s ease;
 }
 .ivelt-pro-media-root .media-container iframe,
 .ivelt-pro-media-root .media-container video {
-  width: 100%;
-  height: 180px;
   display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   border: 0;
   background: #000;
 }
-.ivelt-pro-media-root .media-container.is-audio,
-.ivelt-pro-media-root .media-container.is-audio iframe,
-.ivelt-pro-media-root .media-container.is-audio video {
-  height: 60px !important;
+
+/* Expanded (after play / clicking ⤢): full content width with 16:9 ratio */
+.ivelt-pro-media-root .media-container.is-expanded {
+  width: 100%;
+}
+
+/* Audio (.mp3) — short bar, transparent */
+.ivelt-pro-media-root .media-container.is-audio {
+  aspect-ratio: auto;
+  height: 50px;
   background: transparent;
 }
-.ivelt-pro-media-root .media-container.is-expanded {
-  width: 640px;
+.ivelt-pro-media-root .media-container.is-audio video {
+  background: transparent;
 }
-.ivelt-pro-media-root .media-container.is-expanded iframe,
-.ivelt-pro-media-root .media-container.is-expanded video {
-  height: 360px;
-}
+
 .ivelt-pro-media-root .ivelt-media-expand {
   position: absolute;
   top: 6px;
   right: 6px;
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   border: 1px solid rgba(255,255,255,0.4);
   background: rgba(0,0,0,0.55);
   color: #fff;
-  font-size: 14px;
+  font-size: 15px;
   border-radius: 4px;
   cursor: pointer;
   z-index: 2;

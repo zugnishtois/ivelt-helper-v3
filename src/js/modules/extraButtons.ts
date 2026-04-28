@@ -157,48 +157,99 @@ export function setupExtraButtons(cfg: ExtraButtonsConfig) {
 
 /* ---------- Anchor-snap movable button bar ---------- */
 /*
-   Snaps to one of 6 anchors inside its own postbody:
-     tl (top-left), tc (top-center), tr (top-right)
+   Snaps to one of FIVE anchors inside its own postbody (tl is disabled):
+     tc (top-center), tr (top-right)
      bl (bottom-left), bc (bottom-center), br (bottom-right)
    Drag handle (⠿) is hover-only — appears when the user hovers the bar.
+   While dragging we render small "snap zone" bubbles to show valid drop targets.
 */
 
 import type { ButtonsBarAnchor } from '../stateManager';
 
-const ALL_ANCHORS: ButtonsBarAnchor[] = ['tl', 'tc', 'tr', 'bl', 'bc', 'br'];
+// tl is intentionally NOT in this list (user disabled it — that's where the bar
+// originally sits and would conflict with the post header).
+const ALLOWED_ANCHORS: ButtonsBarAnchor[] = ['tc', 'tr', 'bl', 'bc', 'br'];
 
-function applyAnchor(bar: HTMLElement, anchor: ButtonsBarAnchor) {
-  // Reset all four edge properties first.
-  bar.style.left = '';
-  bar.style.right = '';
-  bar.style.top = '';
-  bar.style.bottom = '';
-  bar.style.transform = '';
+function anchorPx(postBody: HTMLElement, bar: HTMLElement, anchor: ButtonsBarAnchor) {
+  const parentRect = postBody.getBoundingClientRect();
+  const barRect = bar.getBoundingClientRect();
+  const W = parentRect.width;
+  const H = parentRect.height;
+  const bw = barRect.width  || 200;
+  const bh = barRect.height || 32;
 
+  let left = 0, top = 0;
   switch (anchor) {
-    case 'tl': bar.style.top = '0';  bar.style.left  = '0'; break;
-    case 'tc': bar.style.top = '0';  bar.style.left  = '50%'; bar.style.transform = 'translateX(-50%)'; break;
-    case 'tr': bar.style.top = '0';  bar.style.right = '0'; break;
-    case 'bl': bar.style.bottom = '0'; bar.style.left  = '0'; break;
-    case 'bc': bar.style.bottom = '0'; bar.style.left  = '50%'; bar.style.transform = 'translateX(-50%)'; break;
-    case 'br': bar.style.bottom = '0'; bar.style.right = '0'; break;
+    case 'tl': left = 0;            top = 0;            break;
+    case 'tc': left = (W - bw) / 2; top = 0;            break;
+    case 'tr': left = W - bw;       top = 0;            break;
+    case 'bl': left = 0;            top = H - bh;       break;
+    case 'bc': left = (W - bw) / 2; top = H - bh;       break;
+    case 'br': left = W - bw;       top = H - bh;       break;
   }
+  return { left: Math.max(0, left), top: Math.max(0, top) };
 }
 
-function nearestAnchor(xPct: number, yPct: number): ButtonsBarAnchor {
-  // Anchors as (x%, y%) reference points
-  const points: Record<ButtonsBarAnchor, [number, number]> = {
-    tl: [0, 0],   tc: [50, 0],   tr: [100, 0],
-    bl: [0, 100], bc: [50, 100], br: [100, 100],
-  };
-  let best: ButtonsBarAnchor = 'tl';
+function applyAnchor(bar: HTMLElement, postBody: HTMLElement, anchor: ButtonsBarAnchor) {
+  // Use explicit px math instead of CSS edge properties — this works
+  // reliably even when the postbody has weird flex/min-height rules.
+  const { left, top } = anchorPx(postBody, bar, anchor);
+  bar.style.left = `${left}px`;
+  bar.style.top = `${top}px`;
+  bar.style.right = 'auto';
+  bar.style.bottom = 'auto';
+  bar.style.transform = '';
+  bar.dataset.iveltAnchor = anchor;
+}
+
+// Pick nearest allowed anchor based on the bar's CENTER position (px relative to postbody).
+function nearestAnchor(postBody: HTMLElement, bar: HTMLElement, centerX: number, centerY: number): ButtonsBarAnchor {
+  let best: ButtonsBarAnchor = ALLOWED_ANCHORS[0];
   let bestDist = Infinity;
-  for (const a of ALL_ANCHORS) {
-    const [px, py] = points[a];
-    const d = (px - xPct) ** 2 + (py - yPct) ** 2;
+  for (const a of ALLOWED_ANCHORS) {
+    const { left, top } = anchorPx(postBody, bar, a);
+    const barRect = bar.getBoundingClientRect();
+    const ax = left + barRect.width  / 2;
+    const ay = top  + barRect.height / 2;
+    const d = (ax - centerX) ** 2 + (ay - centerY) ** 2;
     if (d < bestDist) { bestDist = d; best = a; }
   }
   return best;
+}
+
+/* ---------- Snap-zone overlay (visible during drag) ---------- */
+
+interface SnapOverlay {
+  root: HTMLDivElement;
+  markers: Map<ButtonsBarAnchor, HTMLDivElement>;
+  destroy: () => void;
+}
+
+function buildSnapOverlay(postBody: HTMLElement, bar: HTMLElement): SnapOverlay {
+  const root = document.createElement('div');
+  root.className = 'ivelt-pro-snap-overlay';
+  postBody.appendChild(root);
+
+  const markers = new Map<ButtonsBarAnchor, HTMLDivElement>();
+  for (const a of ALLOWED_ANCHORS) {
+    const m = document.createElement('div');
+    m.className = `ivelt-pro-snap-zone snap-${a}`;
+    const { left, top } = anchorPx(postBody, bar, a);
+    const barRect = bar.getBoundingClientRect();
+    // Place marker centered on where the bar's CENTER would land
+    const cx = left + barRect.width  / 2;
+    const cy = top  + barRect.height / 2;
+    m.style.left = `${cx}px`;
+    m.style.top  = `${cy}px`;
+    root.appendChild(m);
+    markers.set(a, m);
+  }
+
+  return {
+    root,
+    markers,
+    destroy() { root.remove(); }
+  };
 }
 
 function enableFreeDrag(
@@ -214,8 +265,10 @@ function enableFreeDrag(
     postBody.style.position = 'relative';
   }
 
-  const initialAnchor: ButtonsBarAnchor = (savedPos as ButtonsBarAnchor) || 'tl';
-  applyAnchor(bar, initialAnchor);
+  // tl is no longer allowed; if savedPos was tl (or nothing) default to tc.
+  let initialAnchor: ButtonsBarAnchor = (savedPos as ButtonsBarAnchor) || 'tc';
+  if (initialAnchor === 'tl') initialAnchor = 'tc';
+  applyAnchor(bar, postBody, initialAnchor);
 
   if (!bar.querySelector('.ivelt-pro-drag-handle')) {
     const handle = document.createElement('span');
@@ -225,8 +278,20 @@ function enableFreeDrag(
     bar.appendChild(handle);
 
     let dragging = false;
-    let ghostLeft = 0, ghostTop = 0; // px relative to postBody
+    let ghostLeft = 0, ghostTop = 0;
     let startX = 0, startY = 0;
+    let overlay: SnapOverlay | null = null;
+    let activeAnchor: ButtonsBarAnchor = initialAnchor;
+
+    const updateActiveMarker = (centerX: number, centerY: number) => {
+      if (!overlay) return;
+      const a = nearestAnchor(postBody, bar, centerX, centerY);
+      if (a !== activeAnchor) {
+        overlay.markers.get(activeAnchor)?.classList.remove('is-active');
+        overlay.markers.get(a)?.classList.add('is-active');
+        activeAnchor = a;
+      }
+    };
 
     handle.addEventListener('mousedown', (e: MouseEvent) => {
       e.preventDefault();
@@ -241,12 +306,15 @@ function enableFreeDrag(
       startX = e.clientX;
       startY = e.clientY;
 
-      // While dragging, switch to free-position so the ghost can move
       bar.style.left = `${ghostLeft}px`;
       bar.style.top  = `${ghostTop}px`;
       bar.style.right = 'auto';
       bar.style.bottom = 'auto';
       bar.style.transform = '';
+
+      // Show snap zones
+      overlay = buildSnapOverlay(postBody, bar);
+      updateActiveMarker(ghostLeft + rect.width / 2, ghostTop + rect.height / 2);
 
       const onMove = (mv: MouseEvent) => {
         if (!dragging) return;
@@ -258,6 +326,7 @@ function enableFreeDrag(
         const newTop  = clamp(ghostTop  + (mv.clientY - startY), 0, Math.max(0, maxTop));
         bar.style.left = `${newLeft}px`;
         bar.style.top  = `${newTop}px`;
+        updateActiveMarker(newLeft + barR.width / 2, newTop + barR.height / 2);
       };
 
       const onUp = async () => {
@@ -267,29 +336,37 @@ function enableFreeDrag(
         document.removeEventListener('mousemove', onMove);
         document.removeEventListener('mouseup', onUp);
 
-        const parentR = postBody.getBoundingClientRect();
-        const barR = bar.getBoundingClientRect();
-        // Center of bar as % of postbody
-        const cx = ((barR.left - parentR.left) + barR.width  / 2) / parentR.width  * 100;
-        const cy = ((barR.top  - parentR.top)  + barR.height / 2) / parentR.height * 100;
-        const anchor = nearestAnchor(cx, cy);
+        // Remove overlay
+        overlay?.destroy();
+        overlay = null;
 
-        applyAnchor(bar, anchor);
+        const anchor = activeAnchor;
+        applyAnchor(bar, postBody, anchor);
         await saveSettings({ buttonsBarPosition: anchor });
 
         // Propagate to every other movable bar on the page.
         document.querySelectorAll<HTMLElement>('.post-buttons.ivelt-pro-movable').forEach(other => {
           if (other === bar) return;
           const otherParent = other.parentElement as HTMLElement | null;
-          if (otherParent && window.getComputedStyle(otherParent).position === 'static') {
+          if (!otherParent) return;
+          if (window.getComputedStyle(otherParent).position === 'static') {
             otherParent.style.position = 'relative';
           }
-          applyAnchor(other, anchor);
+          applyAnchor(other, otherParent, anchor);
         });
       };
 
       document.addEventListener('mousemove', onMove);
       document.addEventListener('mouseup', onUp);
+    });
+  }
+
+  // Re-apply anchor on window resize so bottom anchors track the new postbody size.
+  if (!bar.dataset.iveltResizeBound) {
+    bar.dataset.iveltResizeBound = '1';
+    window.addEventListener('resize', () => {
+      const cur = (bar.dataset.iveltAnchor as ButtonsBarAnchor) || initialAnchor;
+      applyAnchor(bar, postBody, cur);
     });
   }
 }
