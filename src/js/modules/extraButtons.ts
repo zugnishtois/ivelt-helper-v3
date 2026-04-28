@@ -23,13 +23,13 @@ export function setupExtraButtons(cfg: ExtraButtonsConfig) {
   const posts = document.querySelectorAll('.post.has-profile');
 
   posts.forEach(post => {
-    const postBody = post.querySelector('.postbody') as HTMLElement | null;
-    const postButtons = postBody?.querySelector('.post-buttons') as HTMLElement | null;
+    const postWrap = post.querySelector('.postbody') as HTMLElement | null;
+    const postButtons = postWrap?.querySelector('.post-buttons') as HTMLElement | null;
     const postProfile = post.querySelector('.postprofile');
     const usernameEl = postProfile?.querySelector('.username-coloured, .username') as HTMLAnchorElement;
 
     const postIdMatch = post.id.match(/^p(\d+)$/);
-    if (!postIdMatch || !postButtons || !postBody) return;
+    if (!postIdMatch || !postButtons || !postWrap) return;
 
     const postId = postIdMatch[1];
     const username = usernameEl?.textContent?.trim() || '';
@@ -118,7 +118,7 @@ export function setupExtraButtons(cfg: ExtraButtonsConfig) {
         li.querySelector('a')?.addEventListener('click', async (e) => {
           e.preventDefault();
           const settings = await loadSettings();
-          const content = postBody.querySelector('.content') as HTMLElement | null;
+          const content = postWrap.querySelector('.content') as HTMLElement | null;
           if (!content) return;
           const bbcode = htmlToBBCode(content, settings.copyAttachments);
           const postUrl = `${window.location.origin}/forum/viewtopic.php?p=${postId}#p${postId}`;
@@ -133,7 +133,7 @@ export function setupExtraButtons(cfg: ExtraButtonsConfig) {
 
       // === ציטיר לעצטע === (last quote only)
       if (cfg.enableCiteLast && existingQuoteHref) {
-        const content = postBody.querySelector('.content');
+        const content = postWrap.querySelector('.content');
         const hasInnerQuote = content?.innerHTML.includes('blockquote');
         if (hasInnerQuote) {
           const li = document.createElement('li');
@@ -150,7 +150,11 @@ export function setupExtraButtons(cfg: ExtraButtonsConfig) {
     }
 
     if (cfg.movableBar) {
-      enableFreeDrag(postButtons, postBody, cfg.savedPosition);
+      // Anchor relative to the WHOLE .post so bottom-anchors sit at the
+      // visual bottom of the post (which on phpBB is taller than the postbody
+      // alone when there's a tall profile column on the side, and is the
+      // expected drop-zone when posts contain embedded media).
+      enableFreeDrag(postButtons, post as HTMLElement, cfg.savedPosition);
     }
   });
 }
@@ -166,12 +170,12 @@ export function setupExtraButtons(cfg: ExtraButtonsConfig) {
 
 import type { ButtonsBarAnchor } from '../stateManager';
 
-// tl is intentionally NOT in this list (user disabled it — that's where the bar
-// originally sits and would conflict with the post header).
-const ALLOWED_ANCHORS: ButtonsBarAnchor[] = ['tc', 'tr', 'bl', 'bc', 'br'];
+// User config: top-right disabled. Allowed = top-left, top-center,
+// bottom-left, bottom-center, bottom-right.
+const ALLOWED_ANCHORS: ButtonsBarAnchor[] = ['tl', 'tc', 'bl', 'bc', 'br'];
 
-function anchorPx(postBody: HTMLElement, bar: HTMLElement, anchor: ButtonsBarAnchor) {
-  const parentRect = postBody.getBoundingClientRect();
+function anchorPx(postWrap: HTMLElement, bar: HTMLElement, anchor: ButtonsBarAnchor) {
+  const parentRect = postWrap.getBoundingClientRect();
   const barRect = bar.getBoundingClientRect();
   const W = parentRect.width;
   const H = parentRect.height;
@@ -190,10 +194,10 @@ function anchorPx(postBody: HTMLElement, bar: HTMLElement, anchor: ButtonsBarAnc
   return { left: Math.max(0, left), top: Math.max(0, top) };
 }
 
-function applyAnchor(bar: HTMLElement, postBody: HTMLElement, anchor: ButtonsBarAnchor) {
+function applyAnchor(bar: HTMLElement, postWrap: HTMLElement, anchor: ButtonsBarAnchor) {
   // Use explicit px math instead of CSS edge properties — this works
   // reliably even when the postbody has weird flex/min-height rules.
-  const { left, top } = anchorPx(postBody, bar, anchor);
+  const { left, top } = anchorPx(postWrap, bar, anchor);
   bar.style.left = `${left}px`;
   bar.style.top = `${top}px`;
   bar.style.right = 'auto';
@@ -203,11 +207,11 @@ function applyAnchor(bar: HTMLElement, postBody: HTMLElement, anchor: ButtonsBar
 }
 
 // Pick nearest allowed anchor based on the bar's CENTER position (px relative to postbody).
-function nearestAnchor(postBody: HTMLElement, bar: HTMLElement, centerX: number, centerY: number): ButtonsBarAnchor {
+function nearestAnchor(postWrap: HTMLElement, bar: HTMLElement, centerX: number, centerY: number): ButtonsBarAnchor {
   let best: ButtonsBarAnchor = ALLOWED_ANCHORS[0];
   let bestDist = Infinity;
   for (const a of ALLOWED_ANCHORS) {
-    const { left, top } = anchorPx(postBody, bar, a);
+    const { left, top } = anchorPx(postWrap, bar, a);
     const barRect = bar.getBoundingClientRect();
     const ax = left + barRect.width  / 2;
     const ay = top  + barRect.height / 2;
@@ -225,16 +229,16 @@ interface SnapOverlay {
   destroy: () => void;
 }
 
-function buildSnapOverlay(postBody: HTMLElement, bar: HTMLElement): SnapOverlay {
+function buildSnapOverlay(postWrap: HTMLElement, bar: HTMLElement): SnapOverlay {
   const root = document.createElement('div');
   root.className = 'ivelt-pro-snap-overlay';
-  postBody.appendChild(root);
+  postWrap.appendChild(root);
 
   const markers = new Map<ButtonsBarAnchor, HTMLDivElement>();
   for (const a of ALLOWED_ANCHORS) {
     const m = document.createElement('div');
     m.className = `ivelt-pro-snap-zone snap-${a}`;
-    const { left, top } = anchorPx(postBody, bar, a);
+    const { left, top } = anchorPx(postWrap, bar, a);
     const barRect = bar.getBoundingClientRect();
     // Place marker centered on where the bar's CENTER would land
     const cx = left + barRect.width  / 2;
@@ -254,21 +258,21 @@ function buildSnapOverlay(postBody: HTMLElement, bar: HTMLElement): SnapOverlay 
 
 function enableFreeDrag(
   bar: HTMLElement,
-  postBody: HTMLElement,
+  postWrap: HTMLElement,    // the .post.has-profile wrapper
   savedPos: ButtonsBarPosition | null,
 ) {
   if (bar.dataset.iveltMovable === '1') return;
   bar.dataset.iveltMovable = '1';
   bar.classList.add('ivelt-pro-movable');
 
-  if (window.getComputedStyle(postBody).position === 'static') {
-    postBody.style.position = 'relative';
+  if (window.getComputedStyle(postWrap).position === 'static') {
+    postWrap.style.position = 'relative';
   }
 
-  // tl is no longer allowed; if savedPos was tl (or nothing) default to tc.
-  let initialAnchor: ButtonsBarAnchor = (savedPos as ButtonsBarAnchor) || 'tc';
-  if (initialAnchor === 'tl') initialAnchor = 'tc';
-  applyAnchor(bar, postBody, initialAnchor);
+  // top-right not allowed; fall back to top-center if it was saved.
+  let initialAnchor: ButtonsBarAnchor = (savedPos as ButtonsBarAnchor) || 'tl';
+  if (initialAnchor === 'tr') initialAnchor = 'tc';
+  applyAnchor(bar, postWrap, initialAnchor);
 
   if (!bar.querySelector('.ivelt-pro-drag-handle')) {
     const handle = document.createElement('span');
@@ -285,7 +289,7 @@ function enableFreeDrag(
 
     const updateActiveMarker = (centerX: number, centerY: number) => {
       if (!overlay) return;
-      const a = nearestAnchor(postBody, bar, centerX, centerY);
+      const a = nearestAnchor(postWrap, bar, centerX, centerY);
       if (a !== activeAnchor) {
         overlay.markers.get(activeAnchor)?.classList.remove('is-active');
         overlay.markers.get(a)?.classList.add('is-active');
@@ -300,7 +304,7 @@ function enableFreeDrag(
       bar.classList.add('ivelt-pro-dragging');
 
       const rect = bar.getBoundingClientRect();
-      const parentRect = postBody.getBoundingClientRect();
+      const parentRect = postWrap.getBoundingClientRect();
       ghostLeft = rect.left - parentRect.left;
       ghostTop  = rect.top  - parentRect.top;
       startX = e.clientX;
@@ -313,12 +317,12 @@ function enableFreeDrag(
       bar.style.transform = '';
 
       // Show snap zones
-      overlay = buildSnapOverlay(postBody, bar);
+      overlay = buildSnapOverlay(postWrap, bar);
       updateActiveMarker(ghostLeft + rect.width / 2, ghostTop + rect.height / 2);
 
       const onMove = (mv: MouseEvent) => {
         if (!dragging) return;
-        const parentR = postBody.getBoundingClientRect();
+        const parentR = postWrap.getBoundingClientRect();
         const barR = bar.getBoundingClientRect();
         const maxLeft = parentR.width  - barR.width;
         const maxTop  = parentR.height - barR.height;
@@ -341,18 +345,18 @@ function enableFreeDrag(
         overlay = null;
 
         const anchor = activeAnchor;
-        applyAnchor(bar, postBody, anchor);
+        applyAnchor(bar, postWrap, anchor);
         await saveSettings({ buttonsBarPosition: anchor });
 
         // Propagate to every other movable bar on the page.
         document.querySelectorAll<HTMLElement>('.post-buttons.ivelt-pro-movable').forEach(other => {
           if (other === bar) return;
-          const otherParent = other.parentElement as HTMLElement | null;
-          if (!otherParent) return;
-          if (window.getComputedStyle(otherParent).position === 'static') {
-            otherParent.style.position = 'relative';
+          const otherWrap = other.closest('.post.has-profile') as HTMLElement | null;
+          if (!otherWrap) return;
+          if (window.getComputedStyle(otherWrap).position === 'static') {
+            otherWrap.style.position = 'relative';
           }
-          applyAnchor(other, otherParent, anchor);
+          applyAnchor(other, otherWrap, anchor);
         });
       };
 
@@ -361,13 +365,21 @@ function enableFreeDrag(
     });
   }
 
-  // Re-apply anchor on window resize so bottom anchors track the new postbody size.
+  // Re-apply anchor on window resize so bottom anchors track the new post size.
   if (!bar.dataset.iveltResizeBound) {
     bar.dataset.iveltResizeBound = '1';
     window.addEventListener('resize', () => {
       const cur = (bar.dataset.iveltAnchor as ButtonsBarAnchor) || initialAnchor;
-      applyAnchor(bar, postBody, cur);
+      applyAnchor(bar, postWrap, cur);
     });
+    // Also re-apply when the post resizes (media expanding, etc).
+    if ('ResizeObserver' in window) {
+      const ro = new ResizeObserver(() => {
+        const cur = (bar.dataset.iveltAnchor as ButtonsBarAnchor) || initialAnchor;
+        applyAnchor(bar, postWrap, cur);
+      });
+      ro.observe(postWrap);
+    }
   }
 }
 

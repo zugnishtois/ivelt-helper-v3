@@ -51,17 +51,25 @@ export function setupMediaPlayer() {
       cont.className = `media-container ${isAudio ? 'is-audio' : ''}`;
 
       if (item.type === 'google-drive') {
-        // Drive iframes can't expose play events cross-origin. Add an explicit expand toggle.
+        // Drive iframes are cross-origin so we can't read 'play' events.
+        // Auto-expand on FIRST click into the iframe via the focus-blur trick:
+        // when an iframe receives a click, the parent window's focus is lost
+        // and document.activeElement becomes the iframe.
         cont.innerHTML = `
           <iframe src="https://drive.google.com/file/d/${item.id}/preview"
                   frameborder="0" loading="lazy" scrolling="no" allowfullscreen></iframe>
-          <button class="ivelt-media-expand" type="button" title="פארגרעסער / פארקלענער">⤢</button>
         `;
-        const expandBtn = cont.querySelector('.ivelt-media-expand') as HTMLButtonElement;
-        expandBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          cont.classList.toggle('is-expanded');
-        });
+        const iframe = cont.querySelector('iframe') as HTMLIFrameElement;
+        const onBlur = () => {
+          // Defer so document.activeElement updates first
+          setTimeout(() => {
+            if (document.activeElement === iframe) {
+              cont.classList.add('is-expanded');
+              window.removeEventListener('blur', onBlur);
+            }
+          }, 0);
+        };
+        window.addEventListener('blur', onBlur);
       } else {
         cont.innerHTML = `
           <video controls preload="metadata" data-filename="${item.filename || ''}">
@@ -69,8 +77,9 @@ export function setupMediaPlayer() {
           </video>
         `;
         const video = cont.querySelector('video') as HTMLVideoElement;
-        // Auto-expand on first play
-        video.addEventListener('play', () => cont.classList.add('is-expanded'), { once: false });
+        // Expand on play OR on any click into the player.
+        video.addEventListener('play', () => cont.classList.add('is-expanded'));
+        video.addEventListener('click', () => cont.classList.add('is-expanded'));
       }
 
       const links = document.createElement('div');

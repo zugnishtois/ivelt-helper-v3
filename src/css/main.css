@@ -256,20 +256,27 @@
 
 /* -- Embedded Media Player -- */
 /* Matches the old ivelt-media extension: full container width with 16:9 aspect
-   ratio when expanded. Starts compact (thumbnail size) and grows on play. */
+   ratio when expanded. Starts compact (thumbnail size) and grows on play.
+   Background sits only around the actual player (not the full row). */
 .ivelt-pro-media-root {
   margin: 12px 0;
-  padding: 10px;
-  border-left: solid #60a5fa 3px;
-  background: #dbeafe;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
+  align-items: flex-start;     /* don't stretch to full row width */
 }
 .ivelt-pro-media-root .media-item {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  padding: 10px;
+  border-left: solid #60a5fa 3px;
+  background: #dbeafe;
+  width: fit-content;          /* hug the player */
+  max-width: 100%;
+}
+.ivelt-pro-media-root .media-item:has(.media-container.is-expanded) {
+  width: 100%;                 /* expand the wrapper too on play */
 }
 .ivelt-pro-media-root .media-links {
   font-size: 0.85rem;

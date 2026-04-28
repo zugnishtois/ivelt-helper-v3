@@ -55,9 +55,9 @@ export function setupNewResponseNotification() {
   function showBanner() {
     if (document.getElementById('ivelt-pro-new-response-banner')) return; // dedupe
     const html = `
-      <h3 id="ivelt-pro-new-response-banner" style="margin:6px auto;text-align:center;background:#cadceb;padding:8px;border-radius:7px;user-select:none;">
-        נייע תגובות זענען צוגעקומען
-        <a class="button" style="display:inline-block;margin:6px 0 0;padding:4px 18px;" href="/forum/viewtopic.php?t=${topicId}&view=unread#unread">רילאוד</a>
+      <h3 id="ivelt-pro-new-response-banner" style="margin:6px auto;text-align:center;background:#cadceb;padding:10px 8px;border-radius:7px;user-select:none;">
+        <div style="margin-bottom:8px;">נייע תגובות זענען צוגעקומען</div>
+        <a class="button" style="display:inline-block;padding:4px 22px;" href="/forum/viewtopic.php?t=${topicId}&view=unread#unread">רילאוד</a>
       </h3>
     `;
     lastPost.insertAdjacentHTML("afterend", html);
