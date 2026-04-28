@@ -175,10 +175,14 @@ import type { ButtonsBarAnchor } from '../stateManager';
 const ALLOWED_ANCHORS: ButtonsBarAnchor[] = ['tl', 'tc', 'bl', 'bc', 'br'];
 
 function anchorPx(postWrap: HTMLElement, bar: HTMLElement, anchor: ButtonsBarAnchor) {
-  const parentRect = postWrap.getBoundingClientRect();
+  // clientWidth/Height give the padding-box dims — that's exactly the area
+  // an absolutely-positioned child is positioned against. getBoundingClientRect
+  // returns the border-box, which is wider/taller than the positioning area
+  // when the parent has any border, and that mismatch is what was offsetting
+  // the ghost rectangles vs. where the bar actually lands.
+  const W = postWrap.clientWidth;
+  const H = postWrap.clientHeight;
   const barRect = bar.getBoundingClientRect();
-  const W = parentRect.width;
-  const H = parentRect.height;
   const bw = barRect.width  || 200;
   const bh = barRect.height || 32;
 

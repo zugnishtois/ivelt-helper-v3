@@ -36,7 +36,7 @@
 /* -- Movable post-buttons bar (snap to 5 anchors) -- */
 .post .post-buttons.ivelt-pro-movable {
   position: absolute !important;
-  z-index: 1;          /* below site dropdowns/menus */
+  z-index: 10;         /* above embedded media (iframes/videos), below site dropdowns */
   width: auto !important;
   height: auto !important;
   min-height: 0 !important;
@@ -86,7 +86,7 @@
 .post .post-buttons.ivelt-pro-dragging {
   opacity: 0.85;
   box-shadow: 0 4px 14px rgba(0,0,0,0.18);
-  z-index: 2;
+  z-index: 11;
 }
 
 /* -- Quote-selection floating popup (ציטיר) -- */
