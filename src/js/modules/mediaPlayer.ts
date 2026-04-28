@@ -50,17 +50,7 @@ export function setupMediaPlayer() {
       const cont = document.createElement('div');
       cont.className = `media-container ${isAudio ? 'is-audio' : ''}`;
 
-      const expandHandler = (why: string) => () => {
-        cont.classList.add('is-expanded');
-        const cs = window.getComputedStyle(cont);
-        console.log(`[iVeltPro:mediaExpand] trigger=${why}`, {
-          type: item.type,
-          has_class: cont.classList.contains('is-expanded'),
-          width_after: cs.width,
-          aspect_ratio: cs.aspectRatio,
-          parent_width: (cont.parentElement as HTMLElement)?.getBoundingClientRect().width,
-        });
-      };
+      const expand = () => cont.classList.add('is-expanded');
 
       if (item.type === 'google-drive') {
         cont.innerHTML = `
@@ -70,13 +60,13 @@ export function setupMediaPlayer() {
         const iframe = cont.querySelector('iframe') as HTMLIFrameElement;
 
         // Capture-phase mousedown on the container — fires BEFORE the click reaches the iframe.
-        cont.addEventListener('mousedown', expandHandler('iframe-mousedown'), { capture: true, once: true });
+        cont.addEventListener('mousedown', expand, { capture: true, once: true });
 
         // Fallback: window-blur + activeElement === iframe (touch / keyboard / focus).
         const onBlur = () => {
           setTimeout(() => {
             if (document.activeElement === iframe) {
-              expandHandler('iframe-blur')();
+              expand();
               window.removeEventListener('blur', onBlur);
             }
           }, 0);
@@ -89,9 +79,9 @@ export function setupMediaPlayer() {
           </video>
         `;
         const video = cont.querySelector('video') as HTMLVideoElement;
-        video.addEventListener('play',  expandHandler('video-play'));
-        video.addEventListener('click', expandHandler('video-click'));
-        cont.addEventListener('click',  expandHandler('container-click'));
+        video.addEventListener('play',  expand);
+        video.addEventListener('click', expand);
+        cont.addEventListener('click',  expand);
       }
 
       const links = document.createElement('div');

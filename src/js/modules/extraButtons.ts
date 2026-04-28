@@ -150,12 +150,6 @@ export function setupExtraButtons(cfg: ExtraButtonsConfig) {
     }
 
     if (cfg.movableBar) {
-      console.log('[iVeltPro:movableBar] wiring post', {
-        post_id: post.id,
-        postbody_native_position: postBody ? window.getComputedStyle(postBody).position : '<no postbody>',
-        post_native_position: window.getComputedStyle(post as HTMLElement).position,
-        savedPos: cfg.savedPosition,
-      });
       enableFreeDrag(postButtons, post as HTMLElement, cfg.savedPosition);
     }
   });
@@ -208,30 +202,6 @@ function applyAnchor(bar: HTMLElement, postWrap: HTMLElement, anchor: ButtonsBar
   bar.style.bottom = 'auto';
   bar.style.transform = '';
   bar.dataset.iveltAnchor = anchor;
-
-  // DEBUG: dump everything we need to diagnose ghost-vs-actual mismatch.
-  // Read AFTER applying styles so we can see the *actual* placement.
-  requestAnimationFrame(() => {
-    const offsetParent = bar.offsetParent as HTMLElement | null;
-    const parentRect = postWrap.getBoundingClientRect();
-    const barRect = bar.getBoundingClientRect();
-    const postbodyEl = postWrap.querySelector('.postbody') as HTMLElement | null;
-    console.log(`[iVeltPro:applyAnchor] ${anchor}`, {
-      asked_left: left, asked_top: top,
-      actual_left_in_postWrap: Math.round(barRect.left - parentRect.left),
-      actual_top_in_postWrap:  Math.round(barRect.top  - parentRect.top),
-      delta_left: Math.round((barRect.left - parentRect.left) - left),
-      delta_top:  Math.round((barRect.top  - parentRect.top)  - top),
-      postWrap_clientWH: [postWrap.clientWidth, postWrap.clientHeight],
-      postWrap_rectWH:   [Math.round(parentRect.width), Math.round(parentRect.height)],
-      bar_WH:            [Math.round(barRect.width), Math.round(barRect.height)],
-      bar_offsetParent:  offsetParent ? `${offsetParent.tagName}.${offsetParent.className}` : null,
-      postWrap_id:       postWrap.id,
-      postWrap_position: window.getComputedStyle(postWrap).position,
-      postbody_position: postbodyEl ? window.getComputedStyle(postbodyEl).position : '<no postbody>',
-      postWrap_has_movable_class: postWrap.classList.contains('ivelt-pro-has-movable-bar'),
-    });
-  });
 }
 
 // Pick nearest allowed anchor based on the bar's CENTER position (px relative to postbody).
