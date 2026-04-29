@@ -1,6 +1,4 @@
 export function applySmartPagination() {
-  console.log('iVelt Pro: Smart Pagination Enabled');
-  
   // Find all rows in topic lists
   const rows = document.querySelectorAll('li.row');
 

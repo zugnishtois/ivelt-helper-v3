@@ -1,6 +1,4 @@
 export function setupKeyboardShortcuts() {
-  console.log('iVelt Pro: Keyboard Shortcuts Enabled');
-
   function previousPage() {
     (document.querySelector(".previous a") as HTMLElement)?.click();
   }

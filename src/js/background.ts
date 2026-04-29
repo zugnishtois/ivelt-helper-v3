@@ -6,9 +6,7 @@ const CHECK_INTERVAL_MINUTES = 2;
 const LAST_COUNT_KEY = 'ivelt_last_notification_count';
 
 // On install: set up the alarm
-chrome.runtime.onInstalled.addListener((details) => {
-  console.log('iVelt Pro extension installed:', details.reason);
-  
+chrome.runtime.onInstalled.addListener(() => {
   // Start the notification check alarm
   chrome.alarms.create(NOTIFICATION_ALARM, {
     delayInMinutes: 1,

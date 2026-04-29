@@ -9,24 +9,28 @@
 let popup: HTMLDivElement | null = null;
 
 export function setupCitePopup() {
-  document.addEventListener('mouseup', handleSelection, true);
-  document.addEventListener('selectionchange', () => {
-    // Hide if selection is collapsed
-    const sel = window.getSelection();
-    if (!sel || sel.isCollapsed) hidePopup();
-  });
+  document.addEventListener('mouseup', handleSelection);
   // Click anywhere else closes the popup
   document.addEventListener('mousedown', (e) => {
-    if (popup && e.target !== popup) hidePopup();
-  }, true);
+    if (popup && !popup.contains(e.target as Node)) hidePopup();
+  });
+}
+
+/** Walk up from a node to find an Element matching the selector. */
+function ancestor(node: Node | null, selector: string): HTMLElement | null {
+  let n: Node | null = node;
+  while (n && n !== document.body) {
+    if (n.nodeType === 1 && (n as Element).matches?.(selector)) return n as HTMLElement;
+    n = n.parentNode;
+  }
+  return null;
 }
 
 function handleSelection(e: MouseEvent) {
-  // Ignore if click was on our own popup
-  if (popup && (e.target === popup || (e.target as Element)?.closest?.('#ivelt-pro-cite-popup'))) {
-    return;
-  }
-  // Defer slightly so window.getSelection reflects the latest state
+  // Ignore mouseups on the popup itself.
+  if (popup && popup.contains(e.target as Node)) return;
+  // Defer so the browser has finalized the selection — important for
+  // double/triple-click which finalize after multiple mouseups.
   setTimeout(() => {
     const sel = window.getSelection();
     if (!sel || sel.isCollapsed) {
@@ -39,22 +43,21 @@ function handleSelection(e: MouseEvent) {
       return;
     }
 
-    // Selection must be inside a .postbody / .content
-    const range = sel.getRangeAt(0);
-    const container = range.commonAncestorContainer.parentElement;
-    const post = container?.closest?.('.post.has-profile') as HTMLElement | null;
+    // Walk up from the selection's anchor (not commonAncestor — for triple-click
+    // that's the .content itself, which broke our previous .closest() check).
+    const post = ancestor(sel.anchorNode, '.post.has-profile');
     if (!post) {
       hidePopup();
       return;
     }
-    const inContent = container?.closest?.('.postbody .content');
+    const inContent = ancestor(sel.anchorNode, '.postbody .content');
     if (!inContent) {
       hidePopup();
       return;
     }
 
-    showPopupForRange(range, text, post);
-  }, 0);
+    showPopupForRange(sel.getRangeAt(0), text, post);
+  }, 10);
 }
 
 function showPopupForRange(range: Range, text: string, post: HTMLElement) {

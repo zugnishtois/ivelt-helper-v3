@@ -45,9 +45,17 @@
 .post.has-profile.ivelt-pro-has-movable-bar [id^="post_content"] {
   position: static !important;
 }
+/* Hide the movable bar while ANY site dropdown is open — it would otherwise
+   float over the dropdown panel because both are positioned. Covers both
+   phpBB's .dropdown-visible class and our cloned bells (which set inline
+   display:block on the dropdown). */
+body:has(.dropdown-container.dropdown-visible) .post-buttons.ivelt-pro-movable,
+body:has(.dropdown-extended[style*="display: block"]) .post-buttons.ivelt-pro-movable {
+  visibility: hidden !important;
+}
 .post .post-buttons.ivelt-pro-movable {
   position: absolute !important;
-  z-index: 10;         /* above embedded media (iframes/videos), below site dropdowns */
+  z-index: 1;          /* matches original Ivelt Helper — keeps it below site dropdowns */
   width: auto !important;
   height: auto !important;
   min-height: 0 !important;
@@ -105,7 +113,7 @@
    position: fixed wins over the movable's position: absolute. */
 .post .post-buttons.ivelt-pro-movable.ivelt-pro-stuck {
   position: fixed !important;
-  z-index: 20 !important;
+  z-index: 1 !important;       /* matches original Ivelt Helper sticky-post; sits below site dropdowns */
   background-color: rgba(202, 220, 235, 0.85);
   border: 1px solid #C7C3BF;
   padding: 4px 6px;
@@ -277,13 +285,12 @@
 }
 
 /* -- Embedded Media Player -- */
-/* Matches the old ivelt-media extension: full container width with 16:9 aspect
-   ratio when expanded. Starts compact (thumbnail size) and grows on play.
-   Background sits only around the actual player (not the full row). */
+/* Embedded player — starts compact (320px thumbnail size). Click expands
+   to full content width with 16:9 ratio. Wraps each item in a blue-bordered
+   info box so download link sits next to the player. */
 .ivelt-pro-media-root {
   margin: 12px 0;
-  display: block;             /* block, not flex — flex was preventing
-                                 the expanded child from growing */
+  display: block;
 }
 .ivelt-pro-media-root .media-item {
   display: inline-block;
@@ -297,16 +304,15 @@
   box-sizing: border-box;
 }
 .ivelt-pro-media-root .media-item:has(.media-container.is-expanded) {
-  display: block !important;
-  width: 100% !important;
+  display: block;
+  width: 100%;
 }
 .ivelt-pro-media-root .media-links {
   font-size: 0.85rem;
   display: flex;
   gap: 1rem;
+  margin-bottom: 0.5rem;
 }
-
-/* Compact (default, before play) */
 .ivelt-pro-media-root .media-container {
   position: relative;
   isolation: isolate;
@@ -316,7 +322,10 @@
   background: #000;
   border-radius: 6px;
   overflow: hidden;
-  transition: width 0.3s ease;
+  transition: width 0.25s ease;
+}
+.ivelt-pro-media-root .media-container.is-expanded {
+  width: 100%;
 }
 .ivelt-pro-media-root .media-container iframe,
 .ivelt-pro-media-root .media-container video {
@@ -328,13 +337,13 @@
   border: 0;
   background: #000;
 }
-
-/* Expanded (after play / first click): full content width with 16:9 ratio */
-.ivelt-pro-media-root .media-container.is-expanded {
-  width: 100% !important;
+/* While collapsed, iframe is non-interactive so clicks fall through to the
+   container's listener. After expand, iframe becomes interactive. */
+.ivelt-pro-media-root .media-container:not(.is-expanded) {
+  cursor: pointer;
 }
-.ivelt-pro-media-root .media-item:has(.media-container.is-expanded) {
-  width: 100% !important;
+.ivelt-pro-media-root .media-container:not(.is-expanded) iframe {
+  pointer-events: none;
 }
 
 /* Audio (.mp3) — short bar, transparent */
@@ -345,25 +354,6 @@
 }
 .ivelt-pro-media-root .media-container.is-audio video {
   background: transparent;
-}
-
-.ivelt-pro-media-root .ivelt-media-expand {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 28px;
-  height: 28px;
-  border: 1px solid rgba(255,255,255,0.4);
-  background: rgba(0,0,0,0.55);
-  color: #fff;
-  font-size: 15px;
-  border-radius: 4px;
-  cursor: pointer;
-  z-index: 2;
-  line-height: 1;
-}
-.ivelt-pro-media-root .ivelt-media-expand:hover {
-  background: rgba(0,0,0,0.8);
 }
 
 /* -- New-Response banner / notification splitter etc. inherit site styles -- */

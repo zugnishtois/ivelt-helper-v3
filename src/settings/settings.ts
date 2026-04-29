@@ -68,7 +68,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   bindCheckbox('citeInOtherTopic');
   bindCheckbox('citeLastQuote');
   bindCheckbox('copyAttachments');
-  bindCheckbox('debugMode');
 
   bindNumberSelect('backgroundSyncPosts');
   bindNumberSelect('backgroundSyncNotif');

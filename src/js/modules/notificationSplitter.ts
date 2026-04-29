@@ -1,6 +1,4 @@
 export function setupNotificationSplitter() {
-  console.log('iVelt Pro: Notification Splitter Enabled');
-
   const originalLI = document.querySelector('#notification_list')?.closest('li');
   if (!originalLI) return;
 

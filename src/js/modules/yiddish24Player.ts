@@ -7,8 +7,6 @@
 const Y24_LINK_REGEX = /https?:\/\/(?:www\.)?yiddish24\.com\/[^/]+\/\d+\/\d+/;
 
 export function setupYiddish24Player() {
-  console.log('iVelt Pro: Yiddish24 Player enabled');
-  
   // Find all links in post content
   const contentDivs = document.querySelectorAll('.postbody .content, .post .content');
   

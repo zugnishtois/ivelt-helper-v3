@@ -1,6 +1,4 @@
 export function setupGoogleSearch() {
-  console.log('iVelt Pro: Google Search Enabled');
-
   // Topic specific search
   if (window.location.href.includes("viewtopic.php")) {
     const topicTitleEl = document.querySelector('.topic-title > a');

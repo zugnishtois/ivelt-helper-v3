@@ -15,7 +15,6 @@ import { setupWarnOnLosingPost } from './modules/warnOnLosingPost';
 
 async function init() {
   const settings = await loadSettings();
-  if (settings.debugMode) console.log('iVelt Pro: Extension initialized.', settings);
 
   if (settings.smartPagination) applySmartPagination();
   if (settings.autoResizeImages) setupImageResizer();

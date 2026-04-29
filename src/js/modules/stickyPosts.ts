@@ -1,6 +1,4 @@
 export function setupStickyPosts() {
-  console.log('iVelt Pro: Sticky Posts Enabled');
-
   const postButtons = document.querySelectorAll('.has-profile .post-buttons');
 
   const checkStickyPosition = () => {

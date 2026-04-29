@@ -1,4 +1,5 @@
 import { saveSettings, loadSettings, ButtonsBarPosition } from '../stateManager';
+import type { ButtonsBarAnchor } from '../stateManager';
 
 export interface ExtraButtonsConfig {
   enableMention: boolean;
@@ -9,10 +10,11 @@ export interface ExtraButtonsConfig {
   savedPosition: ButtonsBarPosition | null;
 }
 
+const ALLOWED_ANCHORS: ButtonsBarAnchor[] = ['tl', 'tc', 'bl', 'bc', 'br'];
+
 export function setupExtraButtons(cfg: ExtraButtonsConfig) {
   if (!window.location.pathname.includes('viewtopic.php')) return;
 
-  // ציטיר לעצטע: when URL has last=true, strip nested quotes from the message box.
   if (window.location.href.includes('last=true')) {
     const ta = document.querySelector('#message') as HTMLTextAreaElement | null;
     if (ta && hasNestedQuotes(ta.value)) {
@@ -23,13 +25,12 @@ export function setupExtraButtons(cfg: ExtraButtonsConfig) {
   const posts = document.querySelectorAll('.post.has-profile');
 
   posts.forEach(post => {
-    const postWrap = post.querySelector('.postbody') as HTMLElement | null;
-    const postButtons = postWrap?.querySelector('.post-buttons') as HTMLElement | null;
-    const postProfile = post.querySelector('.postprofile');
-    const usernameEl = postProfile?.querySelector('.username-coloured, .username') as HTMLAnchorElement;
+    const postBody = post.querySelector('.postbody') as HTMLElement | null;
+    const postButtons = postBody?.querySelector('.post-buttons') as HTMLElement | null;
+    const usernameEl = post.querySelector('.postprofile .username-coloured, .postprofile .username') as HTMLAnchorElement;
 
     const postIdMatch = post.id.match(/^p(\d+)$/);
-    if (!postIdMatch || !postButtons || !postWrap) return;
+    if (!postIdMatch || !postButtons || !postBody) return;
 
     const postId = postIdMatch[1];
     const username = usernameEl?.textContent?.trim() || '';
@@ -39,112 +40,105 @@ export function setupExtraButtons(cfg: ExtraButtonsConfig) {
     const timeEl = post.querySelector('time') as HTMLTimeElement;
     const postTime = timeEl ? Math.floor(Date.parse(timeEl.dateTime) / 1000).toString() : '';
 
-    {
-      // Per-button existence check: only skip buttons that are already there.
-      // (Was: skipping ALL buttons if any one existed, which is why some posts
-      // were missing some of the buttons.)
-      const existingQuoteBtn = postButtons.querySelector('i.icon.fa-quote-left')?.closest('li');
-      const existingQuoteHref = existingQuoteBtn?.querySelector('a')?.getAttribute('href') || '';
-      let lastInserted: Element | null = existingQuoteBtn || null;
+    const existingQuoteBtn = postButtons.querySelector('i.icon.fa-quote-left')?.closest('li');
+    const existingQuoteHref = existingQuoteBtn?.querySelector('a')?.getAttribute('href') || '';
+    let lastInserted: Element | null = existingQuoteBtn || null;
 
-      const insertAfter = (el: HTMLLIElement) => {
-        if (lastInserted && lastInserted.parentNode) {
-          lastInserted.after(el);
+    const insertAfter = (el: HTMLLIElement) => {
+      if (lastInserted && lastInserted.parentNode) {
+        lastInserted.after(el);
+      } else {
+        postButtons.appendChild(el);
+      }
+      lastInserted = el;
+    };
+
+    if (cfg.enableMention && !postButtons.querySelector('.ivelt-pro-mention-btn')) {
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <a class="button button-icon-only custom-btn ivelt-pro-mention-btn" title="דערמאן א ניק (Mention)">
+          <i class="icon fa-at fa-fw" aria-hidden="true" style="width:auto;min-width:18px;"></i>
+          <span>דערמאן א ניק</span>
+        </a>`;
+      li.querySelector('a')?.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const bbcode = `[quote="${username}" user_id=${userId} time=${postTime} post_id=${postId}]\n[/quote]`;
+        const settings = await loadSettings();
+        if (settings.alwaysCopyTopic) {
+          navigator.clipboard.writeText(bbcode).then(() => showNotification('קאפירט'));
         } else {
-          postButtons.appendChild(el);
+          insertTextIntoQuickReply(bbcode);
         }
-        lastInserted = el;
-      };
+      });
+      insertAfter(li);
+    }
 
-      // === @ Mention ===
-      if (cfg.enableMention && !postButtons.querySelector('.ivelt-pro-mention-btn')) {
-        const li = document.createElement('li');
-        li.innerHTML = `
-          <a class="button button-icon-only custom-btn ivelt-pro-mention-btn" title="דערמאן א ניק (Mention)">
-            <i class="icon fa-at fa-fw" aria-hidden="true" style="width:auto;min-width:18px;"></i>
-            <span>דערמאן א ניק</span>
-          </a>`;
-        li.querySelector('a')?.addEventListener('click', async (e) => {
-          e.preventDefault();
-          const bbcode = `[quote="${username}" user_id=${userId} time=${postTime} post_id=${postId}]\n[/quote]`;
-          const settings = await loadSettings();
-          if (settings.alwaysCopyTopic) {
-            navigator.clipboard.writeText(bbcode).then(() => showNotification('קאפירט'));
-          } else {
-            insertTextIntoQuickReply(bbcode);
+    if (cfg.enableCopyLink && !postButtons.querySelector('.ivelt-pro-quote-btn')) {
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <a class="button button-icon-only custom-btn ivelt-pro-quote-btn" title="קאפי לינק (Copy Link)">
+          <i class="icon fa-link fa-fw" aria-hidden="true" style="width:auto;min-width:18px;"></i>
+          <span>קאפי לינק</span>
+        </a>`;
+      li.querySelector('a')?.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const url = `${window.location.origin}/forum/viewtopic.php?p=${postId}#p${postId}`;
+        try {
+          await navigator.clipboard.writeText(url);
+          const icon = li.querySelector('i');
+          if (icon) {
+            icon.classList.remove('fa-link');
+            icon.classList.add('fa-check');
+            setTimeout(() => {
+              icon.classList.remove('fa-check');
+              icon.classList.add('fa-link');
+            }, 2000);
           }
-        });
-        insertAfter(li);
-      }
-
-      // === Copy Link ===
-      if (cfg.enableCopyLink && !postButtons.querySelector('.ivelt-pro-quote-btn')) {
-        const li = document.createElement('li');
-        li.innerHTML = `
-          <a class="button button-icon-only custom-btn ivelt-pro-quote-btn" title="קאפי לינק (Copy Link)">
-            <i class="icon fa-link fa-fw" aria-hidden="true" style="width:auto;min-width:18px;"></i>
-            <span>קאפי לינק</span>
-          </a>`;
-        li.querySelector('a')?.addEventListener('click', async (e) => {
-          e.preventDefault();
-          const url = `${window.location.origin}/forum/viewtopic.php?p=${postId}#p${postId}`;
-          try {
-            await navigator.clipboard.writeText(url);
-            const icon = li.querySelector('i');
-            if (icon) {
-              icon.classList.remove('fa-link');
-              icon.classList.add('fa-check');
-              setTimeout(() => {
-                icon.classList.remove('fa-check');
-                icon.classList.add('fa-link');
-              }, 2000);
-            }
-          } catch (err) {
-            console.error('iVelt Pro: copy link failed', err);
-          }
-        });
-        insertAfter(li);
-      }
-
-      // === ציטיר אין אנדערע אשכול === (full BBCode quote + url)
-      if (cfg.enableCiteOtherTopic && !postButtons.querySelector('.ivelt-pro-cite-other-btn')) {
-        const li = document.createElement('li');
-        li.innerHTML = `
-          <a class="button button-icon-only custom-btn ivelt-pro-cite-other-btn" title="ציטיר אין אנדערע אשכול">
-            <i class="icon fa-copy fa-fw" aria-hidden="true" style="width:auto;min-width:18px;"></i>
-            <span>ציטיר אין אנדערע אשכול</span>
-          </a>`;
-        li.querySelector('a')?.addEventListener('click', async (e) => {
-          e.preventDefault();
-          const settings = await loadSettings();
-          const content = postWrap.querySelector('.content') as HTMLElement | null;
-          if (!content) return;
-          const bbcode = htmlToBBCode(content, settings.copyAttachments);
-          const postUrl = `${window.location.origin}/forum/viewtopic.php?p=${postId}#p${postId}`;
-          const out = `[quote="${username}"]${bbcode}[/quote] [url=${postUrl}]מקור[/url]`;
-          try {
-            await navigator.clipboard.writeText(out);
-            showNotification('ציטאט קאפירט');
-          } catch (err) { console.error(err); }
-        });
-        insertAfter(li);
-      }
-
-      // === ציטיר לעצטע === (last quote only)
-      if (cfg.enableCiteLast && existingQuoteHref && !postButtons.querySelector('.ivelt-pro-cite-last-btn')) {
-        const content = postWrap.querySelector('.content');
-        const hasInnerQuote = content?.innerHTML.includes('blockquote');
-        if (hasInnerQuote) {
-          const li = document.createElement('li');
-          const sep = existingQuoteHref.includes('?') ? '&' : '?';
-          const href = `${existingQuoteHref}${sep}last=true`;
-          li.innerHTML = `
-            <a class="button button-icon-only custom-btn ivelt-pro-cite-last-btn" href="${href}" title="ציטיר בלויז די לעצטע תגובה (Last quote only)">
-              <i class="icon fa-quote-left fa-fw" aria-hidden="true" style="width:auto;min-width:18px;">_</i>
-              <span>ציטיר לעצטע</span>
-            </a>`;
-          insertAfter(li);
+        } catch {
+          /* clipboard write failed — noop */
         }
+      });
+      insertAfter(li);
+    }
+
+    if (cfg.enableCiteOtherTopic && !postButtons.querySelector('.ivelt-pro-cite-other-btn')) {
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <a class="button button-icon-only custom-btn ivelt-pro-cite-other-btn" title="ציטיר אין אנדערע אשכול">
+          <i class="icon fa-copy fa-fw" aria-hidden="true" style="width:auto;min-width:18px;"></i>
+          <span>ציטיר אין אנדערע אשכול</span>
+        </a>`;
+      li.querySelector('a')?.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const settings = await loadSettings();
+        const content = postBody.querySelector('.content') as HTMLElement | null;
+        if (!content) return;
+        const bbcode = htmlToBBCode(content, settings.copyAttachments);
+        const postUrl = `${window.location.origin}/forum/viewtopic.php?p=${postId}#p${postId}`;
+        const out = `[quote="${username}"]${bbcode}[/quote] [url=${postUrl}]מקור[/url]`;
+        try {
+          await navigator.clipboard.writeText(out);
+          showNotification('ציטאט קאפירט');
+        } catch {
+          /* clipboard write failed — noop */
+        }
+      });
+      insertAfter(li);
+    }
+
+    if (cfg.enableCiteLast && existingQuoteHref && !postButtons.querySelector('.ivelt-pro-cite-last-btn')) {
+      const content = postBody.querySelector('.content');
+      const hasInnerQuote = content?.innerHTML.includes('blockquote');
+      if (hasInnerQuote) {
+        const li = document.createElement('li');
+        const sep = existingQuoteHref.includes('?') ? '&' : '?';
+        const href = `${existingQuoteHref}${sep}last=true`;
+        li.innerHTML = `
+          <a class="button button-icon-only custom-btn ivelt-pro-cite-last-btn" href="${href}" title="ציטיר בלויז די לעצטע תגובה (Last quote only)">
+            <i class="icon fa-quote-left fa-fw" aria-hidden="true" style="width:auto;min-width:18px;">_</i>
+            <span>ציטיר לעצטע</span>
+          </a>`;
+        insertAfter(li);
       }
     }
 
@@ -154,34 +148,14 @@ export function setupExtraButtons(cfg: ExtraButtonsConfig) {
   });
 }
 
-/* ---------- Anchor-snap movable button bar ---------- */
-/*
-   Snaps to one of FIVE anchors inside its own postbody (tl is disabled):
-     tc (top-center), tr (top-right)
-     bl (bottom-left), bc (bottom-center), br (bottom-right)
-   Drag handle (⠿) is hover-only — appears when the user hovers the bar.
-   While dragging we render small "snap zone" bubbles to show valid drop targets.
-*/
-
-import type { ButtonsBarAnchor } from '../stateManager';
-
-// User config: top-right disabled. Allowed = top-left, top-center,
-// bottom-left, bottom-center, bottom-right.
-const ALLOWED_ANCHORS: ButtonsBarAnchor[] = ['tl', 'tc', 'bl', 'bc', 'br'];
-
 function anchorPx(postWrap: HTMLElement, bar: HTMLElement, anchor: ButtonsBarAnchor) {
-  // Position vertically relative to the WHOLE .post (so bottom = real bottom
-  // of the post, even when the profile/avatar column makes it taller than
-  // postbody). Position horizontally relative to the .postbody — that's
-  // where phpBB natively renders the post-buttons, so "left" matches the
-  // visual edge of the content area and avatars don't trespass on it.
   const postRect = postWrap.getBoundingClientRect();
   const postbody = (postWrap.querySelector('.postbody') as HTMLElement) || postWrap;
   const pbRect = postbody.getBoundingClientRect();
 
   const H = postWrap.clientHeight;
-  const xMin = pbRect.left - postRect.left;          // left edge of postbody within post
-  const xMax = pbRect.right - postRect.left;         // right edge of postbody within post
+  const xMin = pbRect.left - postRect.left;
+  const xMax = pbRect.right - postRect.left;
   const pbWidth = xMax - xMin;
 
   const barRect = bar.getBoundingClientRect();
@@ -210,7 +184,6 @@ function applyAnchor(bar: HTMLElement, postWrap: HTMLElement, anchor: ButtonsBar
   bar.dataset.iveltAnchor = anchor;
 }
 
-// Pick nearest allowed anchor based on the bar's CENTER position (px relative to postbody).
 function nearestAnchor(postWrap: HTMLElement, bar: HTMLElement, centerX: number, centerY: number): ButtonsBarAnchor {
   let best: ButtonsBarAnchor = ALLOWED_ANCHORS[0];
   let bestDist = Infinity;
@@ -225,8 +198,6 @@ function nearestAnchor(postWrap: HTMLElement, bar: HTMLElement, centerX: number,
   return best;
 }
 
-/* ---------- Snap-zone overlay (visible during drag) ---------- */
-
 interface SnapOverlay {
   root: HTMLDivElement;
   markers: Map<ButtonsBarAnchor, HTMLDivElement>;
@@ -238,9 +209,6 @@ function buildSnapOverlay(postWrap: HTMLElement, bar: HTMLElement): SnapOverlay 
   root.className = 'ivelt-pro-snap-overlay';
   postWrap.appendChild(root);
 
-  // Capture the bar's size ONCE (it won't change while dragging) so each
-  // marker renders as a ghost rectangle of the exact dimensions and position
-  // the bar will occupy at that anchor.
   const barRect = bar.getBoundingClientRect();
   const W = barRect.width;
   const H = barRect.height;
@@ -267,7 +235,7 @@ function buildSnapOverlay(postWrap: HTMLElement, bar: HTMLElement): SnapOverlay 
 
 function enableFreeDrag(
   bar: HTMLElement,
-  postWrap: HTMLElement,    // the .post.has-profile wrapper
+  postWrap: HTMLElement,
   savedPos: ButtonsBarPosition | null,
 ) {
   if (bar.dataset.iveltMovable === '1') return;
@@ -278,14 +246,8 @@ function enableFreeDrag(
     postWrap.style.position = 'relative';
   }
 
-  // phpBB sets `.postbody { position: relative }` natively, which would
-  // capture our absolutely-positioned bar (the bar would be relative to
-  // postbody instead of the .post wrapper, and the ghost rectangles
-  // wouldn't match). Force postbody to `static` so the .post becomes the
-  // actual containing block.
   postWrap.classList.add('ivelt-pro-has-movable-bar');
 
-  // top-right not allowed; fall back to top-center if it was saved.
   let initialAnchor: ButtonsBarAnchor = (savedPos as ButtonsBarAnchor) || 'tl';
   if (initialAnchor === 'tr') initialAnchor = 'tc';
   applyAnchor(bar, postWrap, initialAnchor);
@@ -332,7 +294,6 @@ function enableFreeDrag(
       bar.style.bottom = 'auto';
       bar.style.transform = '';
 
-      // Show snap zones
       overlay = buildSnapOverlay(postWrap, bar);
       updateActiveMarker(ghostLeft + rect.width / 2, ghostTop + rect.height / 2);
 
@@ -356,7 +317,6 @@ function enableFreeDrag(
         document.removeEventListener('mousemove', onMove);
         document.removeEventListener('mouseup', onUp);
 
-        // Remove overlay
         overlay?.destroy();
         overlay = null;
 
@@ -364,7 +324,6 @@ function enableFreeDrag(
         applyAnchor(bar, postWrap, anchor);
         await saveSettings({ buttonsBarPosition: anchor });
 
-        // Propagate to every other movable bar on the page.
         document.querySelectorAll<HTMLElement>('.post-buttons.ivelt-pro-movable').forEach(other => {
           if (other === bar) return;
           const otherWrap = other.closest('.post.has-profile') as HTMLElement | null;
@@ -381,7 +340,6 @@ function enableFreeDrag(
     });
   }
 
-  // Re-apply anchor on window resize so bottom anchors track the new post size.
   if (!bar.dataset.iveltResizeBound) {
     bar.dataset.iveltResizeBound = '1';
     window.addEventListener('resize', () => {
@@ -395,9 +353,6 @@ function enableFreeDrag(
       });
       ro.observe(postWrap);
     }
-    // Sticky-on-scroll: while the post is partially scrolled past the top,
-    // pin the bar to the viewport top so it stays visible — including in
-    // posts with embedded media at bottom-anchor.
     enableStickyOnScroll(bar, postWrap);
   }
 }
@@ -408,11 +363,8 @@ function enableStickyOnScroll(bar: HTMLElement, postWrap: HTMLElement) {
 
   const onScroll = () => {
     const r = postWrap.getBoundingClientRect();
-    // Stick once the post has scrolled past the top by at least the bar's height,
-    // and only while at least 40px of the post is still on-screen.
     const shouldStick = r.top < 0 && r.bottom > 60;
     if (shouldStick && !stuck) {
-      // Capture current viewport-x of the bar so it stays in the same column.
       const barR = bar.getBoundingClientRect();
       bar.dataset.iveltStuckLeft = `${barR.left}px`;
       bar.classList.add('ivelt-pro-stuck');
@@ -434,8 +386,6 @@ function enableStickyOnScroll(bar: HTMLElement, postWrap: HTMLElement) {
 }
 
 function clamp(v: number, lo: number, hi: number) { return Math.max(lo, Math.min(hi, v)); }
-
-/* ---------- Helpers ---------- */
 
 function insertTextIntoQuickReply(text: string) {
   const messageBox = (document.getElementById('message') ||
@@ -467,10 +417,7 @@ function showNotification(message: string) {
   setTimeout(() => { if (notify) notify.style.opacity = '0'; }, 1800);
 }
 
-/* ---------- Strip nested quotes (for ציטיר לעצטע) ---------- */
-
 export function hasNestedQuotes(text: string): boolean {
-  // Detect [quote ...] inside an outer [quote ...] block
   const m = text.match(/\[quote[^\]]*\]/i);
   if (!m) return false;
   const after = text.indexOf(m[0]) + m[0].length;
@@ -478,19 +425,13 @@ export function hasNestedQuotes(text: string): boolean {
 }
 
 export function removeNestedQuotes(text: string): string {
-  // Keep only the OUTER quote's last child quote-content. Simple approach:
-  // strip everything between an outer [quote ...] and the LAST inner [quote ...]
-  // Mirrors old extension's behavior loosely — keep last quote only.
   const lastInner = text.lastIndexOf('[quote');
   const firstClose = text.indexOf(']', lastInner);
   if (lastInner > 0 && firstClose > 0) {
-    // Find the matching outer [/quote] for the outermost block
     return text.substring(lastInner);
   }
   return text;
 }
-
-/* ---------- Minimal HTML → BBCode (for ציטיר אין אנדערע אשכול) ---------- */
 
 function htmlToBBCode(root: HTMLElement, copyAttachments: boolean): string {
   const walk = (node: Node): string => {

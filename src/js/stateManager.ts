@@ -34,7 +34,6 @@ export interface ExtensionSettings {
   warnOnLosingPost: boolean;     // warn before losing unsent post
   alwaysCopyTopic: boolean;      // copy quoted text instead of inserting
   copyAttachments: boolean;      // include attachments when copying
-  debugMode: boolean;            // verbose logging
   backgroundSyncPosts: number;   // ms; 0 = off
   backgroundSyncNotif: number;   // minutes; 0 = off
 
@@ -65,7 +64,6 @@ export const defaultSettings: ExtensionSettings = {
   warnOnLosingPost: true,
   alwaysCopyTopic: false,
   copyAttachments: false,
-  debugMode: false,
   backgroundSyncPosts: 60000,
   backgroundSyncNotif: 1,
 

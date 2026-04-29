@@ -2,8 +2,8 @@
  * iVelt Pro — Embedded Media Player.
  *
  * Replaces Google Drive / Dropbox file links inside post content with
- * an inline player. Sized SMALL by default; EXPAND_PLACEHOLDERs to full size when
- * the user starts playing (or clicks the EXPAND_PLACEHOLDER button on Drive iframes).
+ * an inline player at full content width (matching the original
+ * Ivelt Media extension — no small/large click-to-expand).
  */
 
 export function setupMediaPlayer() {
@@ -57,21 +57,9 @@ export function setupMediaPlayer() {
           <iframe src="https://drive.google.com/file/d/${item.id}/preview"
                   frameborder="0" loading="lazy" scrolling="no" allowfullscreen></iframe>
         `;
-        const iframe = cont.querySelector('iframe') as HTMLIFrameElement;
-
-        // Capture-phase mousedown on the container — fires BEFORE the click reaches the iframe.
-        cont.addEventListener('mousedown', expand, { capture: true, once: true });
-
-        // Fallback: window-blur + activeElement === iframe (touch / keyboard / focus).
-        const onBlur = () => {
-          setTimeout(() => {
-            if (document.activeElement === iframe) {
-              expand();
-              window.removeEventListener('blur', onBlur);
-            }
-          }, 0);
-        };
-        window.addEventListener('blur', onBlur);
+        // Iframe gets pointer-events:none until expanded (via CSS), so the click
+        // hits the container and reliably fires expand — for any number of players.
+        cont.addEventListener('click', expand);
       } else {
         cont.innerHTML = `
           <video controls preload="metadata" data-filename="${item.filename || ''}">

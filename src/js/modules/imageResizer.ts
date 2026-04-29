@@ -18,8 +18,6 @@ const processedFiles = new WeakSet<File>();
 let isProcessing = false;
 
 export function setupImageResizer() {
-  console.log('iVelt Pro: Image Resizer Enabled (file/drop/paste)');
-
   // 1. File picker — capture phase so we run BEFORE phpBB
   document.addEventListener('change', handleFileChange, true);
 
